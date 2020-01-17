@@ -8,39 +8,38 @@ using ConvertApiDotNet.Model;
 
 namespace convertapi_automator
 {
-    class Job
-    {
-        public FormatConfig Cofig { get; set; }
-        public string SourceFormat { get; set; }
-        public IEnumerable<ConvertApiFileParam> FileParams { get; set; }
-    }
+    // class Job
+    // {
+    //     public ConvConfig Cofig { get; set; }
+    //     public string SourceFormat { get; set; }
+    //     public IEnumerable<ConvertApiFileParam> FileParams { get; set; }
+    // }
 
     class Scanner
     {
-        public static IEnumerable<Job> GetJobs(DirectoryInfo dir, ConvertApiResponse result = null)
+        public static IEnumerable<ConvertApiFileParam> GetFiles(DirectoryInfo dir)
         {
-            var configs = Config.Read(dir);
-
             var files = dir.GetFiles()
                 .Where(f => !string.Equals(f.Name, "config.txt", StringComparison.InvariantCultureIgnoreCase));
 
-            if (!files.Any() || !configs.Any()) return new List<Job>();
+            // if (!files.Any()) return new List<ConvertApiFileParam>();
 
-            var fileParams = files.SelectMany(FileToParam);
-            var fileFormat = FileFormat(files.First());
+            return files.SelectMany(FileToParam);
 
-            if (result != null)
-            {
-                fileParams.Concat(result.Files.Select(f => new ConvertApiFileParam(f.Url)));
-                fileFormat = Path.GetExtension(result.Files.First().FileName).Replace(".", "");
-            }
-
-            return configs.Select(c => new Job()
-            {
-                Cofig = c,
-                SourceFormat = fileFormat,
-                FileParams = fileParams
-            });
+            // var fileFormat = FileFormat(files.First());
+            //
+            // if (result != null)
+            // {
+            //     fileParams.Concat(result.Files.Select(f => new ConvertApiFileParam(f.Url)));
+            //     fileFormat = Path.GetExtension(result.Files.First().FileName).Replace(".", "");
+            // }
+            //
+            // return configs.Select(c => new Job()
+            // {
+            //     Cofig = c,
+            //     SourceFormat = fileFormat,
+            //     FileParams = fileParams
+            // });
         }
 
         private static string FileFormat(FileInfo f)

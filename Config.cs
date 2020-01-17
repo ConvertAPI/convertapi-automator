@@ -7,24 +7,20 @@ using ConvertApiDotNet;
 
 namespace convertapi_automator
 {
-    class FormatConfig
+    class ConvConfig
     {
-        public string Format { get; set; }
-        public DirectoryInfo ResultDir { get; set; }
+        public string DestinationFormat { get; set; }
         public IEnumerable<ConvertApiParam> Params { get; set; } = new List<ConvertApiParam>();
-        public bool JoinFiles { get; set; } = true;
+        public bool JoinFiles { get; set; }
     }
 
     static class Config
     {
-        public static IEnumerable<FormatConfig> Read(DirectoryInfo dir) => dir.GetDirectories().Select(GetFormatConfig);
-
-        private static FormatConfig GetFormatConfig(DirectoryInfo dir)
+        public static ConvConfig GetConvConfig(DirectoryInfo dir)
         {
-            var formatConfig = new FormatConfig()
+            var formatConfig = new ConvConfig()
             {
-                ResultDir = dir,
-                Format = dir.Name.ToLower(),
+                DestinationFormat = dir.Name.ToLower(),
             };
 
             try
