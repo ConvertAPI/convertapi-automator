@@ -11,26 +11,45 @@ namespace convertapi_automator
     {
         public static IEnumerable<ConvertApiFileParam> GetFiles(DirectoryInfo dir)
         {
+            var tempDir = CreateTempDir();
+            
             var files = dir.GetFiles()
                 .Where(f => !string.Equals(f.Name, "config.txt", StringComparison.InvariantCultureIgnoreCase));
 
-            return files.SelectMany(FileToParam);
+            var tmpFiles = files.Select(f =>
+            {
+                var tmpPath = Path.Combine(tempDir.FullName, f.Name);
+                f.MoveTo(tmpPath);
+                return new FileInfo(tmpPath);
+            });
+
+            var readyFiles = tmpFiles.SelectMany(f =>
+            {
+                var result = new List<FileInfo>();
+                var ext = f.Extension.Replace(".", "");
+                if (ext.Equals("zip", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var zip = ZipFile.OpenRead(f.FullName);
+                    var zipDir = CreateTempDir();
+                    zip.ExtractToDirectory(zipDir.FullName);
+                    result.AddRange(zipDir.GetFiles());
+                }
+                else
+                {
+                    result.Add(f);
+                }
+
+                return result;
+            });
+            
+
+            return readyFiles.Select(f => new ConvertApiFileParam(f));
         }
 
-        private static IEnumerable<ConvertApiFileParam> FileToParam(FileInfo f)
+        private static DirectoryInfo CreateTempDir()
         {
-            var convertApiFileParams = new List<ConvertApiFileParam>();
-
-            var format = Path.GetExtension(f.Name).Replace(".", "");
-            if (format.Equals("zip", StringComparison.InvariantCultureIgnoreCase))
-            {
-                using var zip = ZipFile.OpenRead(f.FullName);
-                convertApiFileParams.AddRange(zip.Entries.Select(zipArchiveEntry => new ConvertApiFileParam(zipArchiveEntry.Open(), zipArchiveEntry.Name)));
-            }
-            else
-                convertApiFileParams.Add(new ConvertApiFileParam(f));
-
-            return convertApiFileParams;
+            var uniqueTempDir = Path.GetFullPath(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            return Directory.CreateDirectory(uniqueTempDir);
         }
     }
 }
