@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using ConvertApiDotNet;
 
 namespace convertapi_automator
 {
     class ConvConfig
     {
+        public DirectoryInfo Directory { get; set; }
         public string DestinationFormat { get; set; }
         public IEnumerable<ConvertApiParam> Params { get; set; } = new List<ConvertApiParam>();
         public bool JoinFiles { get; set; }
@@ -20,7 +20,8 @@ namespace convertapi_automator
         {
             var formatConfig = new ConvConfig()
             {
-                DestinationFormat = dir.Name.ToLower(),
+                Directory = dir,
+                DestinationFormat = dir.Name.ToLower()
             };
 
             try
