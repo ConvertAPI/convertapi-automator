@@ -24,8 +24,8 @@ namespace convertapi_automator
             var format = Path.GetExtension(f.Name).Replace(".", "");
             if (format.Equals("zip", StringComparison.InvariantCultureIgnoreCase))
             {
-                using var zipa = ZipFile.OpenRead(f.FullName);
-                convertApiFileParams.AddRange(zipa.Entries.Select(zipArchiveEntry => new ConvertApiFileParam(zipArchiveEntry.Open(), zipArchiveEntry.Name)));
+                using var zip = ZipFile.OpenRead(f.FullName);
+                convertApiFileParams.AddRange(zip.Entries.Select(zipArchiveEntry => new ConvertApiFileParam(zipArchiveEntry.Open(), zipArchiveEntry.Name)));
             }
             else
                 convertApiFileParams.Add(new ConvertApiFileParam(f));
