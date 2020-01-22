@@ -21,7 +21,7 @@ namespace convertapi_automator
                 var tmpPath = Path.Combine(tempDir.FullName, f.Name);
                 f.MoveTo(tmpPath);
                 return new FileInfo(tmpPath);
-            });
+            }).ToList();
 
             var readyFiles = tmpFiles.SelectMany(f =>
             {
