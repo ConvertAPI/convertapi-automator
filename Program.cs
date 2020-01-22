@@ -40,7 +40,6 @@ namespace convertapi_automator
                 cts.Cancel();
             };
 
-
             Watcher(dir, cts.Token);
             Console.Read();
         }
@@ -49,31 +48,36 @@ namespace convertapi_automator
         {
             ConvertDir(dir);
             using var watcher = new FileSystemWatcher(dir.FullName);
-            watcher.Created += (s, a) => ConvertDir(dir);
+            watcher.Created += (s, a) => ConvertFile(new FileInfo(a.FullPath));
             watcher.EnableRaisingEvents = true;
             mres.Wait(ct);
         }
 
+        static void ConvertFile(FileInfo file, BlockingCollection<ConvertApiFileParam> inQueue = null)
+        {
+            Console.WriteLine($"Found: {file.Name}");
+            var cfg = Config.GetConvConfig(file.Directory);
+            var outQueues = OutQueues(file.Directory);
+            Convert(Scanner.GetFileParams(new List<FileInfo> { file }), cfg, outQueues, inQueue);
+        }
+
         static void ConvertDir(DirectoryInfo dir, BlockingCollection<ConvertApiFileParam> inQueue = null)
         {
-            var localFiles = Scanner.GetFiles(dir);
-            if (localFiles.Any() || inQueue != null)
+            var outQueues = OutQueues(dir);
+            var cfg = Config.GetConvConfig(dir);
+            Convert(Scanner.GetFileParams(dir.GetFiles()), cfg, outQueues, inQueue);
+        }
+
+        private static void Convert(IEnumerable<ConvertApiFileParam> fileParams, ConvConfig cfg, List<BlockingCollection<ConvertApiFileParam>> outQueues, BlockingCollection<ConvertApiFileParam> inQueue = null)
+        {
+            if (fileParams.Any() || inQueue != null)
             {
-                var outQueues = dir.GetDirectories().Select(d =>
-                {
-                    var queue = new BlockingCollection<ConvertApiFileParam>();
-                    Task.Factory.StartNew(() => ConvertDir(d, queue), TaskCreationOptions.LongRunning);
-                    return queue;
-                }).ToList();
-
-                var cfg = Config.GetConvConfig(dir);
-
                 var preQueue = new BlockingCollection<ConvertApiFileParam>();
 
                 // Add local files
                 if (outQueues.Any())
                 {
-                    localFiles.ToList().ForEach(preQueue.Add);
+                    fileParams.ToList().ForEach(preQueue.Add);
                 }
 
                 var skipConversion = inQueue == null || inQueue.IsCompleted;
@@ -114,9 +118,24 @@ namespace convertapi_automator
             }
         }
 
+        private static List<BlockingCollection<ConvertApiFileParam>> OutQueues(DirectoryInfo dir)
+        {
+            return dir.GetDirectories().Select(d =>
+            {
+                var queue = new BlockingCollection<ConvertApiFileParam>();
+                Task.Factory.StartNew(() => ConvertDir(d, queue), TaskCreationOptions.LongRunning);
+                return queue;
+            }).ToList();
+        }
+
         private static Task Convert(IEnumerable<ConvertApiFileParam> fileParams, ConvConfig cfg, List<BlockingCollection<ConvertApiFileParam>> outQueues)
         {
+            Console.WriteLine($"fp: {fileParams.Count()}");
+            Console.WriteLine($"fp: {fileParams.First().GetValueAsync().Result.FileName}");
+
+            // Console.WriteLine($"Converting: {string.Join(", ", fileParams.Select(f => f.GetValueAsync().Result.FileName))} -> {cfg.DestinationFormat}");
             var orderedFileParams = fileParams.OrderBy(fp => fp.GetValueAsync().Result.FileName).ToList();
+            // Console.WriteLine($"fpo: {orderedFileParams.Count()}");
             var srcFormat = orderedFileParams.First().GetValueAsync().Result.FileExt;
             var convertParams = orderedFileParams.Cast<ConvertApiBaseParam>().Concat(cfg.Params).ToList();
             if (!convertParams.Any())
@@ -129,11 +148,18 @@ namespace convertapi_automator
                     Console.WriteLine($"{srcFormat} -> {cfg.DestinationFormat}");
                     if (outQueues.Any())
                     {
-                        r.Result.Files.ToList().ForEach(f =>
+                        try
                         {
-                            var fp = new ConvertApiFileParam(f.Url);
-                            outQueues.ForEach(q => q.Add(fp));
-                        });
+                            r.Result.Files.ToList().ForEach(f =>
+                            {
+                                var fp = new ConvertApiFileParam(f.Url);
+                                outQueues.ForEach(q => q.Add(fp));
+                            });
+                        }
+                        catch (Exception e)
+                        {
+                            Console.Error.WriteLine(e.Message);
+                        }
                     }
                     else
                     {

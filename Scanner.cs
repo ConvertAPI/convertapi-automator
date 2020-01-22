@@ -3,23 +3,38 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 using ConvertApiDotNet;
 
 namespace convertapi_automator
 {
     class Scanner
     {
-        public static IEnumerable<ConvertApiFileParam> GetFiles(DirectoryInfo dir)
+        public static IEnumerable<ConvertApiFileParam> GetFileParams(IEnumerable<FileInfo> files)
         {
             var tempDir = CreateTempDir();
             
-            var files = dir.GetFiles()
-                .Where(f => !string.Equals(f.Name, "config.txt", StringComparison.InvariantCultureIgnoreCase));
+            files = files.Where(f => !string.Equals(f.Name, "config.txt", StringComparison.InvariantCultureIgnoreCase));
 
             var tmpFiles = files.Select(f =>
             {
                 var tmpPath = Path.Combine(tempDir.FullName, f.Name);
-                f.MoveTo(tmpPath);
+
+                var retryNo = 0;
+                while (true)
+                {
+                    try
+                    {
+                        f.MoveTo(tmpPath);
+                        break;
+                    }
+                    catch (IOException e)
+                    {
+                        if (retryNo++ > 100) throw;
+                        Thread.Sleep(500);
+                    }
+                }
+
                 return new FileInfo(tmpPath);
             }).ToList();
 
