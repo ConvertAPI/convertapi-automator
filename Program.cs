@@ -58,17 +58,17 @@ namespace convertapi_automator
             Console.WriteLine($"Found: {file.Name}");
             var cfg = Config.GetConvConfig(file.Directory);
             var outQueues = OutQueues(file.Directory);
-            Convert(Scanner.GetFileParams(new List<FileInfo> { file }), cfg, outQueues, inQueue);
+            DoConvert(Scanner.GetFileParams(new List<FileInfo> { file }), cfg, outQueues, inQueue);
         }
 
         static void ConvertDir(DirectoryInfo dir, BlockingCollection<ConvertApiFileParam> inQueue = null)
         {
             var outQueues = OutQueues(dir);
             var cfg = Config.GetConvConfig(dir);
-            Convert(Scanner.GetFileParams(dir.GetFiles()), cfg, outQueues, inQueue);
+            DoConvert(Scanner.GetFileParams(dir.GetFiles()), cfg, outQueues, inQueue);
         }
 
-        private static void Convert(IEnumerable<ConvertApiFileParam> fileParams, ConvConfig cfg, List<BlockingCollection<ConvertApiFileParam>> outQueues, BlockingCollection<ConvertApiFileParam> inQueue = null)
+        private static void DoConvert(IEnumerable<ConvertApiFileParam> fileParams, ConvConfig cfg, List<BlockingCollection<ConvertApiFileParam>> outQueues, BlockingCollection<ConvertApiFileParam> inQueue = null)
         {
             if (fileParams.Any() || inQueue != null)
             {
@@ -104,7 +104,7 @@ namespace convertapi_automator
                 {
                     if (cfg.JoinFiles)
                     {
-                        Convert(preQueue.GetConsumingEnumerable(), cfg, outQueues).Wait();
+                        Convert(preQueue.GetConsumingEnumerable().ToList(), cfg, outQueues).Wait();
                     }
                     else
                     {
@@ -128,42 +128,34 @@ namespace convertapi_automator
             }).ToList();
         }
 
-        private static Task Convert(IEnumerable<ConvertApiFileParam> fileParams, ConvConfig cfg, List<BlockingCollection<ConvertApiFileParam>> outQueues)
+        private static Task Convert(List<ConvertApiFileParam> fileParams, ConvConfig cfg, List<BlockingCollection<ConvertApiFileParam>> outQueues)
         {
-            Console.WriteLine($"fp: {fileParams.Count()}");
-            Console.WriteLine($"fp: {fileParams.First().GetValueAsync().Result.FileName}");
-
-            // Console.WriteLine($"Converting: {string.Join(", ", fileParams.Select(f => f.GetValueAsync().Result.FileName))} -> {cfg.DestinationFormat}");
+            var fileNamesStr = string.Join(", ", fileParams.Select(f => f.GetValueAsync().Result.FileName));
+            Console.WriteLine($"Converting: {fileNamesStr} -> {cfg.DestinationFormat}");
             var orderedFileParams = fileParams.OrderBy(fp => fp.GetValueAsync().Result.FileName).ToList();
-            // Console.WriteLine($"fpo: {orderedFileParams.Count()}");
             var srcFormat = orderedFileParams.First().GetValueAsync().Result.FileExt;
             var convertParams = orderedFileParams.Cast<ConvertApiBaseParam>().Concat(cfg.Params).ToList();
-            if (!convertParams.Any())
-            {
-                Console.WriteLine("No params");
-            }
             return _convertApi.ConvertAsync(srcFormat, cfg.DestinationFormat, convertParams)
                 .ContinueWith(r =>
                 {
-                    Console.WriteLine($"{srcFormat} -> {cfg.DestinationFormat}");
-                    if (outQueues.Any())
+                    try
                     {
-                        try
+                        if (outQueues.Any())
                         {
-                            r.Result.Files.ToList().ForEach(f =>
-                            {
-                                var fp = new ConvertApiFileParam(f.Url);
-                                outQueues.ForEach(q => q.Add(fp));
-                            });
+                                r.Result.Files.ToList().ForEach(f =>
+                                {
+                                    var fp = new ConvertApiFileParam(f.Url);
+                                    outQueues.ForEach(q => q.Add(fp));
+                                });
                         }
-                        catch (Exception e)
+                        else
                         {
-                            Console.Error.WriteLine(e.Message);
+                            r.Result.SaveFilesAsync(cfg.Directory.FullName).Wait();
                         }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        r.Result.SaveFilesAsync(cfg.Directory.FullName).Wait();
+                        Console.Error.WriteLine($"Unable to convert: {fileNamesStr} -> {cfg.DestinationFormat}\n{e.Message}");
                     }
                 });
         }
