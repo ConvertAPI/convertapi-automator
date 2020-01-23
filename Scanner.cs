@@ -89,14 +89,18 @@ namespace convertapi_automator
                 // Delete uploaded file from local file system
                 fp.GetValueAsync().ContinueWith(fm =>
                 {
-                    if (f.Directory.GetFileSystemInfos().Length <= 1)
-                    {
-                        Directory.Delete(f.Directory.FullName, true);
-                    }
-                    else
-                    {
-                        f.Delete();
-                    }
+                    // var dir = f.Directory;
+                    // f.Delete();
+                    // if (dir.GetFileSystemInfos().Length <= 1) dir.Delete(true);
+
+                    // if (f.Directory.GetFileSystemInfos().Length <= 1)
+                    // {
+                    //     Directory.Delete(f.Directory.FullName, true);
+                    // }
+                    // else
+                    // {
+                    //     f.Delete();
+                    // }
                 });
 
                 return fp;

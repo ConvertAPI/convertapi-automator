@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ConvertApiDotNet;
-// using System.CommandLine.DragonFruit;
 
 namespace convertapi_automator
 {
@@ -15,24 +14,14 @@ namespace convertapi_automator
         private static ConvertApi _convertApi;
         static readonly ManualResetEventSlim mres = new ManualResetEventSlim(false);
 
-        // /// <summary>
-        // /// Convertapi.com automator.
-        // /// </summary>
-        // /// <param name="secret">Your convertapi.com secret.</param>
-        // /// <param name="dir">Conversion directory</param>
-        // static void Main(string secret, DirectoryInfo dir)
-        // {
-        //     // var dir = new DirectoryInfo(@"c:\Projects\_temp");
-        //     _convertApi = new ConvertApi(secret);
-        //     ConvertDir(dir);
-        //     Console.Read();
-        // }
-
-        static void Main(string[] args)
+        /// <summary>
+        /// Convertapi.com automator.
+        /// </summary>
+        /// <param name="secret">Your convertapi.com secret.</param>
+        /// <param name="dir">Conversion directory</param>
+        static void Main(string secret, DirectoryInfo dir)
         {
-            _convertApi = new ConvertApi(args[0]);
-            var dir = new DirectoryInfo(args[1]);
-
+            _convertApi = new ConvertApi(secret);
             var cts = new CancellationTokenSource();
 
             Console.CancelKeyPress += (s, a) =>
