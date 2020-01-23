@@ -9,8 +9,13 @@ using ConvertApiDotNet;
 
 namespace convertapi_automator
 {
-    class Scanner
+    internal static class Scanner
     {
+        /// <summary>
+        /// Creates ConvertApiFileParam from local files (unzips if needed) and removes
+        /// </summary>
+        /// <param name="files">Files</param>
+        /// <returns>Convertapi params</returns>
         public static IEnumerable<ConvertApiFileParam> GetFileParams(IEnumerable<FileInfo> files)
         {
             var filteredFiles = files.Where(f => !string.Equals(f.Name, "config.txt", StringComparison.InvariantCultureIgnoreCase));
@@ -41,13 +46,14 @@ namespace convertapi_automator
                     }
                     catch (IOException e)
                     {
+                        Console.WriteLine($"RETRY MOVE");
+
                         if (retryNo++ > 100)
                         {
                             Console.Error.WriteLine($"Unable access: {f.FullName}\n{e.Message}");
                             break;
                         }
 
-                        ;
                         Thread.Sleep(500);
                     }
                 }
@@ -65,10 +71,13 @@ namespace convertapi_automator
                 var ext = f.Extension.Replace(".", "");
                 if (ext.Equals("zip", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var zip = ZipFile.OpenRead(f.FullName);
-                    var zipDir = CreateTempDir();
-                    zip.ExtractToDirectory(zipDir.FullName);
-                    result.AddRange(zipDir.GetFiles());
+                    using (var zip = ZipFile.OpenRead(f.FullName))
+                    {
+                        var zipDir = CreateTempDir();
+                        zip.ExtractToDirectory(zipDir.FullName);
+                        result.AddRange(zipDir.GetFiles());
+                    }
+                    f.Directory.Delete(true);
                 }
                 else
                 {
@@ -89,18 +98,9 @@ namespace convertapi_automator
                 // Delete uploaded file from local file system
                 fp.GetValueAsync().ContinueWith(fm =>
                 {
-                    // var dir = f.Directory;
-                    // f.Delete();
-                    // if (dir.GetFileSystemInfos().Length <= 1) dir.Delete(true);
-
-                    // if (f.Directory.GetFileSystemInfos().Length <= 1)
-                    // {
-                    //     Directory.Delete(f.Directory.FullName, true);
-                    // }
-                    // else
-                    // {
-                    //     f.Delete();
-                    // }
+                    var dir = f.Directory;
+                    f.Delete();
+                    if (!dir.GetFileSystemInfos().Any()) dir.Delete();
                 });
 
                 return fp;

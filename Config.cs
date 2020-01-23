@@ -14,7 +14,7 @@ namespace convertapi_automator
         public bool JoinFiles { get; set; }
     }
 
-    static class Config
+    internal static class Config
     {
         public static ConvConfig GetConvConfig(DirectoryInfo dir)
         {
@@ -47,7 +47,7 @@ namespace convertapi_automator
                 formatConfig.Params = kvList.Select(kv => new ConvertApiParam(kv.First(), kv.Last())).ToList();
                 formatConfig.Params.ToList().RemoveAll(p => p == null);
             }
-            catch (FileNotFoundException e) { }
+            catch (FileNotFoundException) { }
 
             return formatConfig;
         }
