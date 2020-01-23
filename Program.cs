@@ -27,9 +27,9 @@ namespace convertapi_automator
         /// 
         /// </summary>
         /// <param name="secret">Your convertapi.com secret.</param>
-        /// <param name="dir">File input directory</param>
+        /// <param name="dir">File input directory(ies) </param>
         /// <param name="watch">Watch input directory for new files and automatically convert them</param>
-        static int Main(string secret, string dir, bool watch = false)
+        static int Main(string secret, List<string> dir, bool watch = false)
         {
             var exitCode = 0;
             if (string.IsNullOrEmpty(secret))
@@ -37,29 +37,35 @@ namespace convertapi_automator
                 Console.Error.WriteLine("No secret provided. Please set --secret option. Sign in and get your secret at https://www.convertapi.com");
                 exitCode = 1;
             }
-            if (string.IsNullOrEmpty(dir))
+            if (dir.Any())
+            {
+                dir.FindAll(d => !Directory.Exists(d)).ForEach(d =>
+                {
+                    Console.Error.WriteLine($"Input directory {d} does not exist. Please set valid path to --dir option.");
+                    exitCode = 1;
+                });
+            }
+            else
             {
                 Console.Error.WriteLine("No input directory provided. Please set --dir option to a path of your input directory.");
-                exitCode = 1;
-            }
-            else if (!Directory.Exists(dir))
-            {
-                Console.Error.WriteLine("Input directory does not exist. Please set valid path to --dir option.");
                 exitCode = 1;
             }
 
             if (exitCode == 0)
             {
                 Queue.Init(secret);
-                var dirInfo = new DirectoryInfo(dir);
-            
+                var dirInfos = dir.Select(d => new DirectoryInfo(d)).ToList();
                 if (watch)
                 {
-                    DirWatcher.Start(dirInfo);
+                    var cts = new CancellationTokenSource();
+                    Console.CancelKeyPress += (s, a) => cts.Cancel();
+
+                    var tasks = dirInfos.Select(d => DirWatcher.Start(d, cts.Token));
+                    Task.WaitAll(tasks.ToArray());
                 }
                 else
                 {
-                    Queue.ConvertDir(dirInfo);                
+                    dirInfos.ForEach(d => Queue.ConvertDir(d));
                 }
             }
             else

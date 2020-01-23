@@ -45,7 +45,14 @@ namespace convertapi_automator
         {
             var outQueues = OutQueues(dir);
             var cfg = Config.GetConvConfig(dir);
-            PrepareQueues(Scanner.GetFileParams(dir.GetFiles()), cfg, outQueues, inQueue);
+            if (outQueues.Any())
+            {
+                PrepareQueues(Scanner.GetFileParams(dir.GetFiles()), cfg, outQueues, inQueue);
+            }
+            else
+            {
+                PrepareQueues(new List<ConvertApiFileParam>(), cfg, outQueues, inQueue);
+            }
         }
 
         private static void PrepareQueues(IEnumerable<ConvertApiFileParam> fileParams, ConvConfig cfg, List<BlockingCollection<ConvertApiFileParam>> outQueues, BlockingCollection<ConvertApiFileParam> inQueue = null)

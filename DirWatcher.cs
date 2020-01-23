@@ -1,23 +1,22 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace convertapi_automator
 {
     internal static class DirWatcher
     {
-        private static readonly ManualResetEventSlim Mres = new ManualResetEventSlim(false);
-
-        public static void Start(DirectoryInfo dir)
+        public static Task Start(DirectoryInfo dir, CancellationToken ct)
         {
-            var cts = new CancellationTokenSource();
-            Console.CancelKeyPress += (s, a) => cts.Cancel();
-            
-            Queue.ConvertDir(dir);    // Converting preexisting files
-            using var watcher = new FileSystemWatcher(dir.FullName);
-            watcher.Created += (s, a) => Queue.ConvertFile(new FileInfo(a.FullPath));
-            watcher.EnableRaisingEvents = true;
-            Mres.Wait(cts.Token);
+            return Task.Factory.StartNew(() =>
+            {
+                Queue.ConvertDir(dir); // Converting preexisting files
+                using var watcher = new FileSystemWatcher(dir.FullName);
+                watcher.Created += (s, a) => Queue.ConvertFile(new FileInfo(a.FullPath));
+                watcher.EnableRaisingEvents = true;
+                ct.WaitHandle.WaitOne();
+            }, TaskCreationOptions.LongRunning);
         }
     }
 }
