@@ -46,8 +46,6 @@ namespace convertapi_automator
                     }
                     catch (IOException e)
                     {
-                        Console.WriteLine($"RETRY MOVE");
-
                         if (retryNo++ > 100)
                         {
                             Console.Error.WriteLine($"Unable access: {f.FullName}\n{e.Message}");
@@ -89,7 +87,7 @@ namespace convertapi_automator
             return readyFiles;
         }
 
-        private static IEnumerable<ConvertApiFileParam> FilesToParams(List<FileInfo> readyFiles)
+        private static List<ConvertApiFileParam> FilesToParams(List<FileInfo> readyFiles)
         {
             return readyFiles.Select(f =>
             {
@@ -98,13 +96,20 @@ namespace convertapi_automator
                 // Delete uploaded file from local file system
                 fp.GetValueAsync().ContinueWith(fm =>
                 {
-                    var dir = f.Directory;
-                    f.Delete();
-                    if (!dir.GetFileSystemInfos().Any()) dir.Delete();
+                    try
+                    {
+                        var dir = f.Directory;
+                        f.Delete();
+                        if (!dir.GetFileSystemInfos().Any()) dir.Delete();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Error.WriteLine(e.Message);
+                    }
                 });
 
                 return fp;
-            });
+            }).ToList();
         }
 
         private static DirectoryInfo CreateTempDir()

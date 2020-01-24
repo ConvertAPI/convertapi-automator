@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using ConvertApiDotNet;
@@ -31,6 +31,7 @@ namespace convertapi_automator
         /// <param name="watch">Watch input directory for new files and automatically convert them</param>
         static int Main(string secret, List<string> dir, bool watch = false)
         {
+            Console.WriteLine($"convertapi-automator {Assembly.GetEntryAssembly().GetName().Version}");
             var exitCode = 0;
             if (string.IsNullOrEmpty(secret))
             {

@@ -12,6 +12,7 @@ namespace convertapi_automator
         public string DestinationFormat { get; set; }
         public IEnumerable<ConvertApiParam> Params { get; set; } = new List<ConvertApiParam>();
         public bool JoinFiles { get; set; }
+        public bool SaveIntermediate { get; set; }
     }
 
     internal static class Config
@@ -38,6 +39,12 @@ namespace convertapi_automator
                     if (kv.First().StartsWith("JoinFiles", StringComparison.InvariantCultureIgnoreCase))
                     {
                         formatConfig.JoinFiles = kv.Last().Equals("true", StringComparison.CurrentCultureIgnoreCase);
+                        return true;
+                    }
+
+                    if (kv.First().StartsWith("SaveIntermediate", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        formatConfig.SaveIntermediate = kv.Last().Equals("true", StringComparison.CurrentCultureIgnoreCase);
                         return true;
                     }
 
