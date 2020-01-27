@@ -1,3 +1,5 @@
+# PROJECT IS UNDER DEVELOPMENT, DON'T USE!
+
 # ConvertAPI Automator
 
 ## Automate file conversion on your desktop or server
