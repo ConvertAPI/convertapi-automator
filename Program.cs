@@ -66,7 +66,9 @@ namespace convertapi_automator
                 }
                 else
                 {
-                    dirInfos.ForEach(d => Queue.ConvertDir(d));
+                    Queue.Cde = new CountdownEvent(1);
+                    var sourceFileCount = dirInfos.Sum(d => Queue.ConvertDir(d));
+                    if (sourceFileCount > 0) Queue.Cde.Wait();  // If no source files provided exiting
                 }
             }
             else
