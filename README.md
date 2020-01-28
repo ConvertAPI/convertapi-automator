@@ -1,5 +1,3 @@
-# PROJECT IS UNDER DEVELOPMENT, DON'T USE!
-
 # ConvertAPI Automator
 
 ## Automate file conversion on your desktop or server
@@ -19,9 +17,9 @@ Files can also be supplied in `zip` archive, automator will unzip it for you aut
 
 Download compressed executable
 
-* Linux: [convertapi-automator_lin.zip](http://github)
-* Mac OS X: [convertapi-automator_mac.zip](http://github)
-* Windows: [convertapi-automator_win.zip](http://github)
+* Linux: [convertapi-automator_lin.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v1-alpha.1/convertapi-automator_linux.zip)
+* Mac OS X: [convertapi-automator_mac.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v1-alpha.1/convertapi-automator_osx.zip)
+* Windows: [convertapi-automator_win.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v1-alpha.1/convertapi-automator_win.zip)
 
 (this utility also can be built from source code for many other CPU and OS)
 
@@ -59,7 +57,7 @@ Prepare input directory before conversion (MS Windows):
 Make sure that input directory has no other files but a **copy** of your original document.
 
 ```shell
-convertapi-automator --secret=<YOUR_SECRET_HERE> --dir=C:\path\to\convertdir 
+convertapi-automator.exe --secret=<YOUR_SECRET_HERE> --dir=C:\path\to\convertdir 
 ```
 
 After program is finished you will find your `pdf` file inside `C:\path\to\convertdir\pdf`
