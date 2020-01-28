@@ -4,7 +4,7 @@
 
 ## Automate file conversion on your desktop or server
 
-The ConvertAPI Automator is an application for converting from one file format to another (e.g. `docx` -> `pdf`).
+The ConvertAPI Automator is a tool for converting from one file format to another (e.g. `docx` -> `pdf`).
 Using is simple as copying file to input directory and get result from output directory.
 Supports creating PDF and Images from various sources like Word, Excel, Powerpoint, images, web pages or raw HTML codes.
 Merge, Encrypt, Split, Repair and Decrypt PDF files.
@@ -12,7 +12,7 @@ And many others files manipulations.
 In less than a minute you can setup and start converting files.
 
 The ConvertAPI Automator is using online Convert API service that is processing all the conversions (get your free secret at https://www.convertapi.com/a).
-Files are sent using secure `https` protocol to convertapi.com and are converted in cloud then result are sent back to your computer.
+Files are sent using secure `https` protocol to convertapi.com and are converted in cloud then result is sent back to your computer.
 Files can also be supplied in `zip` archive, automator will unzip it for you automatically.  
 
 ## Installation
@@ -48,7 +48,7 @@ Secret must be supplied as command line argument.
 
 ### Simple conversion
 
-Before we go in to details, short usage example how to convert DOCX file to PDF.
+Short usage example how to convert DOCX file to PDF.
 Prepare input directory before conversion (MS Windows):
 
 - Create input directory where you will copy files for conversion (e.g. `C:\path\to\convertdir`).
@@ -68,7 +68,9 @@ After program is finished you will find your `pdf` file inside `C:\path\to\conve
 ### Command line arguments 
 
 #### --secret
-Your convertapi.com secret. Can be obtained from https://www.convertapi.com/a for free.
+Your convertapi.com secret.
+If not set CONVERTAPI_SECRET environment variable will be used.
+Can be obtained from https://www.convertapi.com/a for free.
 
 _Example:_
 

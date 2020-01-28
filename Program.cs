@@ -27,13 +27,15 @@ namespace convertapi_automator
         /// </para>
         /// 
         /// </summary>
-        /// <param name="secret">Your convertapi.com secret.</param>
+        /// <param name="secret">Your convertapi.com secret. Alternatively can be set to CONVERTAPI_SECRET environment variable.</param>
         /// <param name="dir">File input directory(ies) </param>
         /// <param name="watch">Watch input directory for new files and automatically convert them</param>
         static int Main(string secret, List<string> dir, bool watch = false)
         {
             Console.WriteLine($"convertapi-automator {Assembly.GetEntryAssembly().GetName().Version}");
             var exitCode = 0;
+
+            secret ??= Environment.GetEnvironmentVariable("CONVERTAPI_SECRET");
             if (string.IsNullOrEmpty(secret))
             {
                 Console.Error.WriteLine("No secret provided. Please set --secret option. Sign in and get your secret at https://www.convertapi.com");
