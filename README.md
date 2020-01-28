@@ -218,24 +218,37 @@ There is no limitation on conversion chain length, so any number of directories 
 
 #### Chaining and configuration
 
-This example illustrates hypothetical conversion `docx` -> `pdf` -> `split` -> `rotate`. 
+This example illustrates hypothetical conversion `docx` -> `pdf` -> `merge` -> `rotate`. 
+Converted files are stored inside `merge` not rotated and `rotate` rotated.  
 
 ```text
 /conversion/splitandrotate
     └ pdf
-        └ pdf       
-
+        └ merge
+            ├ config.txt
+            └ rotate   
+                └ config.txt
 ```
+
+`/conversion/splitandrotate/pdf/merge/config.txt`
+```text
+JoinFiles=true
+SaveIntermediate=true
+```
+
+`/conversion/splitandrotate/pdf/merge/rotate/config.txt`
+```text
+RotatePage=180
+```
+
 Command:
 
 ```shell
 convertapi-automator --secret=<YOUR_SECRET_HERE> --dir=/conversion/splitandrotate --watch 
 ```
 
-
-
-
-
+When running in `--watch` mode and merging files, input files must be provided in `zip` archive.
+Archive provides information to automator that all files inside zip must be merged.
 
 
 ### Issues &amp; Comments
