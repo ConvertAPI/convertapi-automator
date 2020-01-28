@@ -30,11 +30,22 @@ unzip convertapi-automator_*.zip
 ```
 
 And you are done.
-Optionally you can move executable file to more appropriate place and make utility accessible for all local users. On Linux would be:   
+Optionally you can move executable file to more appropriate place and make utility accessible for all local users.
+On Linux would be:   
 
 ```shell
 sudo mv convertapi-automator /usr/local/bin
 ```
+
+### Docker
+
+Run docker image:
+
+```shell
+docker run -e "CONVERTAPI_SECRET=<YOUR_SECRET_HERE>" -v /tmp/caa:/var/lib/caa baltsoftcorp/convertapi-automator --watch --dir=/var/lib/caa
+```
+- **<YOUR_SECRET_HERE>** replace with your secret
+- **/tmp/caa** replace with your local input directory path
 
 ## Usage
 
