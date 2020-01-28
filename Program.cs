@@ -22,7 +22,7 @@ namespace convertapi_automator
         /// Conversion destination format(s) are set by creating subdirectories inside input directory named by format.
         /// For example conv-dir/jpg all files placed inside conv-dir will be converted to jpg format and saved inside jpg directory.
         /// Application can run in "watch" mode that will constantly monitor input directory for new files and convert them.
-        /// IMPORTANT: all files that are placed inside input directory will be deleted.
+        /// IMPORTANT: all files that are placed inside input directory will be DELETED during conversion.
         /// </para>
         /// 
         /// </summary>
