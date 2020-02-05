@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "convertapi-automator", "convertapi-automator.csproj", "{A9E0F198-CD9F-4AAF-9461-261A09FC8147}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cli", "Cli\Cli.csproj", "{3B641134-2884-4BE8-9717-4A6F1376DDAB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib", "Lib\Lib.csproj", "{8D8AC7A4-7EBC-46CF-934B-EDB6E69011A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A9E0F198-CD9F-4AAF-9461-261A09FC8147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9E0F198-CD9F-4AAF-9461-261A09FC8147}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9E0F198-CD9F-4AAF-9461-261A09FC8147}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9E0F198-CD9F-4AAF-9461-261A09FC8147}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B641134-2884-4BE8-9717-4A6F1376DDAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B641134-2884-4BE8-9717-4A6F1376DDAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B641134-2884-4BE8-9717-4A6F1376DDAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B641134-2884-4BE8-9717-4A6F1376DDAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D8AC7A4-7EBC-46CF-934B-EDB6E69011A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D8AC7A4-7EBC-46CF-934B-EDB6E69011A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D8AC7A4-7EBC-46CF-934B-EDB6E69011A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D8AC7A4-7EBC-46CF-934B-EDB6E69011A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

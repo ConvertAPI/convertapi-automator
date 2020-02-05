@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 using ConvertApiDotNet;
 using ConvertApiDotNet.Exceptions;
 
-namespace convertapi_automator
+namespace Lib
 {
     /// <summary>
     /// Conversion queue. Responsible for asynchronous file conversion chain configured by directory structure.
     /// </summary>
-    internal static class Queue
+    public static class Queue
     {
         private static ConvertApi _convertApi;
         public static CountdownEvent Cde;

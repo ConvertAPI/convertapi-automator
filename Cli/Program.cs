@@ -4,10 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
-using ConvertApiDotNet;
+using Cli;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.EventLog;
 
-namespace convertapi_automator
+namespace cli
 {
     class Program
     {
@@ -57,21 +60,21 @@ namespace convertapi_automator
 
             if (exitCode == 0)
             {
-                Queue.Init(secret);
+                Lib.Queue.Init(secret);
                 var dirInfos = dir.Select(d => new DirectoryInfo(d)).ToList();
                 if (watch)
                 {
-                    var cts = new CancellationTokenSource();
-                    Console.CancelKeyPress += (s, a) => cts.Cancel();
-
-                    var tasks = dirInfos.Select(d => DirWatcher.Start(d, cts.Token));
-                    Task.WaitAll(tasks.ToArray());
+                    Host.CreateDefaultBuilder()
+                        .ConfigureServices((hostContext, services) =>
+                            {
+                                services.AddHostedService<Worker>(p => new Worker(dirInfos));
+                            }).UseWindowsService().Build().Run();
                 }
                 else
                 {
-                    Queue.Cde = new CountdownEvent(1);
-                    var sourceFileCount = dirInfos.Sum(d => Queue.ConvertDir(d));
-                    if (sourceFileCount > 0) Queue.Cde.Wait();  // If no source files provided exiting
+                    Lib.Queue.Cde = new CountdownEvent(1);
+                    var sourceFileCount = dirInfos.Sum(d => Lib.Queue.ConvertDir(d));
+                    if (sourceFileCount > 0) Lib.Queue.Cde.Wait();  // If no source files provided exiting
                 }
             }
             else

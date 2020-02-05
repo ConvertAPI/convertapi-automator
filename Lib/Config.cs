@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using ConvertApiDotNet;
 
-namespace convertapi_automator
+namespace Lib
 {
     class ConvConfig
     {

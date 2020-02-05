@@ -1,11 +1,10 @@
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace convertapi_automator
+namespace Lib
 {
-    internal static class DirWatcher
+    public static class DirWatcher
     {
         public static Task Start(DirectoryInfo dir, CancellationToken ct)
         {
