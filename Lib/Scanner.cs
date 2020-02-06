@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using ConvertApiDotNet;
 
@@ -40,11 +42,18 @@ namespace Lib
                 {
                     try
                     {
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                        {
+                            var output = RunCommand("lsof", $"-t \"{f.FullName}\"");
+                            if (output.Contains("No such file")) break;
+                            if (output != String.Empty) throw new IOException();
+                        }                        
                         f.MoveTo(tmpPath);
                         break;
                     }
                     catch (IOException e)
                     {
+                        Console.WriteLine($"Retry move");
                         if (retryNo++ > 100)
                         {
                             Console.Error.WriteLine($"Unable access: {f.FullName}\n{e.Message}");
@@ -54,9 +63,9 @@ namespace Lib
                         Thread.Sleep(500);
                     }
                 }
-
-                return new FileInfo(tmpPath);
+                return File.Exists(tmpPath) ? new FileInfo(tmpPath) : null; 
             }).ToList();
+            tmpFiles.RemoveAll(p => p == null);
             return tmpFiles;
         }
 
@@ -116,5 +125,29 @@ namespace Lib
             var uniqueTempDir = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "convertapi-automator", Guid.NewGuid().ToString()));
             return Directory.CreateDirectory(uniqueTempDir);
         }
+        
+        private static string RunCommand(string command, string args)
+        {
+            var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = command,
+                    Arguments = args,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (string.IsNullOrEmpty(error)) { return output; }
+            else { return error; }
+        }    
+        
     }
 }
