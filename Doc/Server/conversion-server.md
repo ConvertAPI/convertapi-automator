@@ -14,20 +14,45 @@ Assuming that your office is using Windows, let's make file format conversion re
 
 ### **Download file converter**
 convertapi-automator tool is just one executable file that don't require installation and can be placed anywhere you like.
-Go to https://github.com/ConvertAPI/convertapi-automator and download compressed executable.
+In this tutorial we will use `C:\convertapi-automator` directory for storing executables and input directories.
+
+Go to https://github.com/ConvertAPI/convertapi-automator and download compressed executable and extract it to `C:\convertapi-automator`.
+
+Download [Windows service registration script](https://raw.githubusercontent.com/ConvertAPI/convertapi-automator/master/Cli/register-win-service.bat).
+Save (Ctrl+S) this script as `register-win-service.bat` in to the same `C:\convertapi-automator` directory. 
+
+### Register to convertapi.com
+convertapi-automator is using convertapi.com API.
+You need to [register](https://www.convertapi.com/a/su) to get your secret key and trial conversion time. 
 
 ### Prepare input and output directory structure
-Extract executable and place it in to `C:\convertapi-automator` directory. Create 
+Inside `C:\convertapi-automator` directory create `share1` directory and share it to other office workstations with `read/write` permissions.
+`C:\convertapi-automator\share1` will be used as input directory for files that will be converted.
 
+Edit `register-win-service.bat`
+![Image description](register-service.png)
 
+Replace `<SECRET>` with your convertapi.com secret.
+Make sure that `--dir=` correctly points to shared input directory.
+Save file and run `register-win-service.bat` as administrator.
+![Image description](register-service-run.png)
 
+After executing bat file you should see running `convertapi-automator` service inside `Services` window.
 
+### Test your setup 
+Create subdirectory inside `C:\convertapi-automator\share1` named as required destination format e.g. `pdf`.
+**Copy** `docx` or any other office document file inside `C:\convertapi-automator\share1` directory.
+**IMPORTANT!!!** ALWAYS COPY NEVER MOVE files in to the input directory as they will be instantly **DELETED**.
+ Open `C:\convertapi-automator\share1\pdf` directory and in few seconds (time depends on input file size) converted `pdf` file will appear.
 
+### Convert from workstation
+...
 
+## Final thoughts
+multi user
 
+chaining
 
 convertapi-automator is developed using most recent Microsoft .NET Core technology so it perfectly meets requirements of this tool.
 
-
-
- that does not require any software on workstation side.
+that does not require any software on workstation side.
