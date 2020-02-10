@@ -12,6 +12,7 @@ namespace Lib
             {
                 Queue.ConvertDir(dir); // Converting preexisting files
                 using var watcher = new FileSystemWatcher(dir.FullName);
+                watcher.NotifyFilter = NotifyFilters.FileName;
                 watcher.Created += (s, a) => Queue.ConvertFile(new FileInfo(a.FullPath));
                 watcher.EnableRaisingEvents = true;
                 ct.WaitHandle.WaitOne();
