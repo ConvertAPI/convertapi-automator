@@ -32,10 +32,9 @@ namespace cli
         /// </summary>
         /// <param name="secret">Your convertapi.com secret. Alternatively can be set to CONVERTAPI_SECRET environment variable.</param>
         /// <param name="dir">File input directory(ies)</param>
-        /// <param name="tree">File input directory tree. All direct subdirectories will be treated as input directories unless overriden by --tree-level.</param>
-        /// <param name="level">File input directory tree level. Default: 1</param>
+        /// <param name="level">File input directory depth level. Default: 0 (supplied directory is an input directory)</param>
         /// <param name="watch">Watch input directory for new files and automatically convert them</param>
-        static int Main(string secret, List<string> dir, List<string> tree, int level=1, bool watch = false)
+        static int Main(string secret, List<string> dir, int level, bool watch = false)
         {
             Console.WriteLine($"convertapi-automator {Assembly.GetEntryAssembly().GetName().Version}");
             var exitCode = 0;
@@ -65,16 +64,17 @@ namespace cli
                 Lib.Queue.Init(secret);
                 
                 var dirInfos = dir.Select(d => new DirectoryInfo(d)).ToList();
-                var treeDirs = tree.Select(d => new DirectoryInfo(d))
-                    .SelectMany(d => GetInputDirs(d, level)).ToList();
-                dirInfos.AddRange(treeDirs);
+                // var treeDirs = tree.Select(d => new DirectoryInfo(d))
+                //     .SelectMany(d => GetInputDirs(d, level)).ToList();
+                // dirInfos.AddRange(treeDirs);
                 
                 if (watch)
                 {
                     Host.CreateDefaultBuilder()
                         .ConfigureServices((hostContext, services) =>
-                            {
-                                services.AddHostedService<Worker>(p => new Worker(dirInfos));
+                        {
+                            var dirInfos = dir.Select(d => new DirectoryInfo(d)).ToList();
+                                services.AddHostedService<Worker>(p => new Worker(dirInfos, level));
                             }).UseWindowsService().Build().Run();
                 }
                 else
@@ -92,16 +92,5 @@ namespace cli
             return exitCode;
         }
 
-        private static List<DirectoryInfo> GetInputDirs(DirectoryInfo dirInfo, int level)
-        {
-            return level > 0 
-                ? dirInfo.GetDirectories().SelectMany(d => GetInputDirs(d, --level)).ToList() 
-                : new List<DirectoryInfo> {dirInfo};
-        }
-
-        private void WatchTreesChange(List<DirectoryInfo> trees)
-        {
-            
-        }
     }
 }
