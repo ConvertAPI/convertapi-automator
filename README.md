@@ -17,9 +17,9 @@ Files can also be supplied in `zip` archive, automator will unzip it for you aut
 
 Download compressed executable
 
-* Linux: [convertapi-automator_lin.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v1-alpha.1/convertapi-automator_linux.zip)
-* Mac OS X: [convertapi-automator_mac.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v1-alpha.1/convertapi-automator_osx.zip)
-* Windows: [convertapi-automator_win.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v1-alpha.1/convertapi-automator_win.zip)
+* Linux: [convertapi-automator_linux.tar.gz](https://github.com/ConvertAPI/convertapi-automator/releases/download/v2/convertapi-automator_linux.tar.gz)
+* Mac OS X: [convertapi-automator_osx.tar.gz](https://github.com/ConvertAPI/convertapi-automator/releases/download/v2/convertapi-automator_osx.tar.gz)
+* Windows: [convertapi-automator_win.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v2/convertapi-automator_win.zip)
 
 (this utility also can be built from source code for many other CPU and OS)
 
@@ -38,7 +38,6 @@ sudo mv convertapi-automator /usr/local/bin
 ```
 
 ### Docker
-
 Run docker image:
 
 ```shell
@@ -60,13 +59,11 @@ To run convertapi-automator as a Windows service follow these steps:
 ## Usage
 
 ### Before you start
-
 In order to use this utility you must create your free trial account on https://www.convertapi.com site.  
 After the sign up process you will get your secret at https://www.convertapi.com/a .
 Secret must be supplied as command line argument.
 
 ### Simple conversion
-
 Short usage example how to convert DOCX file to PDF.
 Prepare input directory before conversion (MS Windows):
 
@@ -152,7 +149,6 @@ _Example:_
 ```
 
 ### Configuration files
-
 Each output directories can contain `config.txt` file with the conversion parameters used in conversion.
 Each parameter is declared in a new line separating parameter name and value using `=` sign.
 
@@ -215,7 +211,6 @@ convertapi-automator --secret=<YOUR_SECRET_HERE> --dir=/my/conversions --watch
 ```
 
 #### Multiple input directory example
-
 Multiple input directories are useful for having many different conversion scenarios.
 convertapi-automator can run on a server watching multiple input directories assigned (shared) to separate users.
 This way you only need one running instance to automate all your organisation.
@@ -244,7 +239,6 @@ convertapi-automator --secret=<YOUR_SECRET_HERE> --dir=/user1/imgconv --dir=/use
 ```
 
 #### Conversion chaining
-
 Sometimes one conversion is not enough, several conversions must be done on one file.
 Conversion chaining solves this problem with ease. 
 Create subdirectories inside output directories named by further conversion format.
