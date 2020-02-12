@@ -40,7 +40,7 @@ namespace Lib
             }, serviceCt);
         }
 
-        private static List<DirectoryInfo> SubDirsByLevel(DirectoryInfo dir, int level)
+        public static List<DirectoryInfo> SubDirsByLevel(DirectoryInfo dir, int level)
         {
             return level > 0 
                 ? dir.GetDirectories().SelectMany(d => SubDirsByLevel(d, --level)).ToList() 

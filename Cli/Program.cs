@@ -5,10 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Cli;
+using Lib;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.EventLog;
 
 namespace cli
 {
@@ -64,23 +63,20 @@ namespace cli
                 Lib.Queue.Init(secret);
                 
                 var dirInfos = dir.Select(d => new DirectoryInfo(d)).ToList();
-                // var treeDirs = tree.Select(d => new DirectoryInfo(d))
-                //     .SelectMany(d => GetInputDirs(d, level)).ToList();
-                // dirInfos.AddRange(treeDirs);
                 
                 if (watch)
                 {
                     Host.CreateDefaultBuilder()
                         .ConfigureServices((hostContext, services) =>
                         {
-                            var dirInfos = dir.Select(d => new DirectoryInfo(d)).ToList();
-                                services.AddHostedService<Worker>(p => new Worker(dirInfos, level));
-                            }).UseWindowsService().Build().Run();
+                            services.AddHostedService<Worker>(p => new Worker(dirInfos, level));
+                        }).UseWindowsService().Build().Run();
                 }
                 else
                 {
                     Lib.Queue.Cde = new CountdownEvent(1);
-                    var sourceFileCount = dirInfos.Sum(d => Lib.Queue.ConvertDir(d));
+                    var inputDirs = dirInfos.SelectMany(d => DirWatcher.SubDirsByLevel(d, level));
+                    var sourceFileCount = inputDirs.Sum(d => Queue.ConvertDir(d));
                     if (sourceFileCount > 0) Lib.Queue.Cde.Wait();  // If no source files provided exiting
                 }
             }
