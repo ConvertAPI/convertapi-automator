@@ -3,13 +3,13 @@
 ## Automate file conversion on your desktop or server
 
 The ConvertAPI Automator is a tool for converting from one file format to another (e.g. `docx` -> `pdf`).
-Using is simple as copying file to input directory and get result from output directory.
+Using is simple as copying files to input directory and getting results from output directory.
 Supports creating PDF and Images from various sources like Word, Excel, Powerpoint, images, web pages or raw HTML codes.
 Merge, Encrypt, Split, Repair and Decrypt PDF files.
-And many others files manipulations.
+And many others file manipulations.
 In less than a minute you can setup and start converting files.
 
-The ConvertAPI Automator is using online Convert API service that is processing all the conversions (get your free secret at https://www.convertapi.com/a).
+The ConvertAPI Automator is using an online Convert API service that is processing all the conversions (get your free secret at https://www.convertapi.com/a).
 Files are sent using secure `https` protocol to convertapi.com and are converted in cloud then result is sent back to your computer.
 Files can also be supplied in `zip` archive, automator will unzip it for you automatically.  
 
@@ -47,12 +47,22 @@ docker run -e "CONVERTAPI_SECRET=<YOUR_SECRET_HERE>" -v /tmp/caa:/var/lib/caa ba
 - **<YOUR_SECRET_HERE>** replace with your secret
 - **/tmp/caa** replace with your local input directory path
 
+
+### Windows service
+`convertapi-automator_win.zip` should contain Windows service installation script `register-win-service.bat`.
+To run convertapi-automator as a Windows service follow these steps:
+
+- Edit `register-win-service.bat` and replace `<SECRET>` with your convertapi.com secret.
+- Set `--dir=` parameter to your input directory (parameter can be used multiple times).
+- Run `register-win-service.bat` **as administrator**.
+
+
 ## Usage
 
 ### Before you start
 
 In order to use this utility you must create your free trial account on https://www.convertapi.com site.  
-After sign up process you will get your secret at https://www.convertapi.com/a .
+After the sign up process you will get your secret at https://www.convertapi.com/a .
 Secret must be supplied as command line argument.
 
 ### Simple conversion
@@ -65,7 +75,7 @@ Prepare input directory before conversion (MS Windows):
 - Create subfolder `pdf` inside the input directory.
 
 **IMPORTANT READ CAREFULLY!!!** All files that are located inside the input directory will be **DELETED** during conversion.
-Make sure that input directory has no other files but a **copy** of your original document.
+Make sure that the input directory has no other files but a **copy** of your original document.
 
 ```shell
 convertapi-automator.exe --secret=<YOUR_SECRET_HERE> --dir=C:\path\to\convertdir 
@@ -99,11 +109,41 @@ _Example:_
 --dir=/path/to/inputdir --dir=/outher/inputdir
 ```
 
+#### --level
+Argument `--dir` may be used with the directory that has subdirectories as input directories.
+`--level` defines which level of subdirectories should be treated as input directories.
+Default value is `0` (`--dir` is directly input directory).    
+
+_Example:_ 
+
+```shell
+--dir=/conversions --level=2
+```
+
+Then directory structure can be:
+
+```text
+/conversions
+    ├ user1
+    │   └ topdf
+    │       └ pdf
+    └ user2
+        └ tojpg
+            └ jpg
+```
+
+As `level` is set to `2`, `/conversions/user1/topdf` and `/conversions/user2/tojpg` is going to be treated as input directories.
+More subdirectories can be added inside `/conversions` without convertapi-automator service restart.
+This structure is convenient for a multiuser environment.
+`/conversions/user1` and `/conversions/user2` can be shared with read write permissions on the local network.
+This way users can add more conversion input directories by themselves.      
+
+
 #### --watch
 Run convertapi-automator in input directories watching mode.
 All files that are placed inside the input directories will be converted and **deleted**.
 
-If convertapi-automator is used as integrated part of other software, STDOUT can be red to get converted file full path.
+If convertapi-automator is used as an integrated part of other software, STDOUT can be red to get a converted file full path.
 
 _Example:_ 
 
@@ -114,7 +154,7 @@ _Example:_
 ### Configuration files
 
 Each output directories can contain `config.txt` file with the conversion parameters used in conversion.
-Each parameter is declared in new line separating parameter name and value using `=` sign.
+Each parameter is declared in a new line separating parameter name and value using `=` sign.
 
 _Example:_ 
 
@@ -177,7 +217,7 @@ convertapi-automator --secret=<YOUR_SECRET_HERE> --dir=/my/conversions --watch
 #### Multiple input directory example
 
 Multiple input directories are useful for having many different conversion scenarios.
-convertapi-automator can run on server watching multiple input directories assigned (shared) to separate users.
+convertapi-automator can run on a server watching multiple input directories assigned (shared) to separate users.
 This way you only need one running instance to automate all your organisation.
 All files that are located inside the input directories will be **DELETED** during conversion.
 
@@ -223,7 +263,7 @@ Command:
 convertapi-automator --secret=<YOUR_SECRET_HERE> --dir=/convert/topdf --watch 
 ```
 
-Output directories can contain multiple subdirectories, result will be converted in to each of them.
+Output directories can contain multiple subdirectories, results will be converted into each of them.
 There is no limitation on conversion chain length, so any number of directories can be nested.
 
 
@@ -258,8 +298,8 @@ Command:
 convertapi-automator --secret=<YOUR_SECRET_HERE> --dir=/conversion/splitandrotate --watch 
 ```
 
-When running in `--watch` mode and merging files, input files must be provided in `zip` archive.
-Archive provides information to automator that all files inside zip must be merged.
+When running in `--watch` mode and merging files, input files must be provided in the `zip` archive.
+Archive provides information to the automator that all files inside zip must be merged.
 
 
 ### Issues &amp; Comments
