@@ -76,14 +76,10 @@ namespace cli
                 }
                 else
                 {
-                    // Stopwatch sw = new Stopwatch();
-                    // sw.Start();
                     Lib.Queue.Cde = new CountdownEvent(1);
                     var inputDirs = dirInfos.SelectMany(d => DirWatcher.SubDirsByLevel(d, level));
                     var sourceFileCount = inputDirs.Sum(d => Queue.ConvertDir(d));
                     if (sourceFileCount > 0) Lib.Queue.Cde.Wait();  // If no source files provided exiting
-                    // sw.Stop();
-                    // Console.WriteLine("Elapsed={0}",sw.Elapsed);
                 }
             }
             else

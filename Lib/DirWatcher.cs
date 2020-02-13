@@ -77,7 +77,6 @@ namespace Lib
         
         public void Reload()
         {
-            Console.WriteLine("RELOAD!!!");
             try
             {
                 reloadMux.WaitOne();

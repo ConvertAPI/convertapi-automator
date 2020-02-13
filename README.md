@@ -148,6 +148,18 @@ _Example:_
 --watch
 ```
 
+#### --concurrency
+Defines how many file conversions can run at once.
+Too high value can cause failing conversions.
+Default value is `10`.    
+
+_Example:_ 
+
+```shell
+--concurrency=15
+```
+
+
 ### Configuration files
 Each output directories can contain `config.txt` file with the conversion parameters used in conversion.
 Each parameter is declared in a new line separating parameter name and value using `=` sign.

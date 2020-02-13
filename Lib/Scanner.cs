@@ -55,7 +55,6 @@ namespace Lib
                     }
                     catch (IOException e)
                     {
-                        Console.WriteLine($"Retry move");
                         if (retryNo++ > 100)
                         {
                             Console.Error.WriteLine($"Unable access: {f.FullName}\n{e.Message}");
