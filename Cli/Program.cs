@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -33,7 +34,8 @@ namespace cli
         /// <param name="dir">File input directory(ies)</param>
         /// <param name="level">File input directory depth level. Default: 0 (supplied directory is an input directory)</param>
         /// <param name="watch">Watch input directory for new files and automatically convert them</param>
-        static int Main(string secret, List<string> dir, int level, bool watch = false)
+        /// <param name="concurrency">File conversion maximum concurrency. Default 10</param>
+        static int Main(string secret, List<string> dir, int level, bool watch = false, int concurrency=10)
         {
             Console.WriteLine($"convertapi-automator {Assembly.GetEntryAssembly().GetName().Version}");
             var exitCode = 0;
@@ -60,7 +62,7 @@ namespace cli
 
             if (exitCode == 0)
             {
-                Lib.Queue.Init(secret);
+                Lib.Queue.Init(secret, concurrency);
                 
                 var dirInfos = dir.Select(d => new DirectoryInfo(d)).ToList();
                 
@@ -74,10 +76,14 @@ namespace cli
                 }
                 else
                 {
+                    // Stopwatch sw = new Stopwatch();
+                    // sw.Start();
                     Lib.Queue.Cde = new CountdownEvent(1);
                     var inputDirs = dirInfos.SelectMany(d => DirWatcher.SubDirsByLevel(d, level));
                     var sourceFileCount = inputDirs.Sum(d => Queue.ConvertDir(d));
                     if (sourceFileCount > 0) Lib.Queue.Cde.Wait();  // If no source files provided exiting
+                    // sw.Stop();
+                    // Console.WriteLine("Elapsed={0}",sw.Elapsed);
                 }
             }
             else

@@ -17,14 +17,16 @@ namespace Lib
     {
         private static ConvertApi _convertApi;
         public static CountdownEvent Cde;
+        private static SemaphoreSlim _concSem;
 
         /// <summary>
         /// Create singleton convertapi library instance.
         /// </summary>
         /// <param name="secret">Convertapi secret</param>
-        public static void Init(string secret)
+        public static void Init(string secret, int maxConc)
         {
             _convertApi = new ConvertApi(secret);
+            _concSem = new SemaphoreSlim(maxConc);
         }
 
         /// <summary>
@@ -139,9 +141,12 @@ namespace Lib
             var convertParams = orderedFileParams.Cast<ConvertApiBaseParam>().Concat(cfg.Params).ToList();
 
             Cde?.AddCount();
+            _concSem.Wait();
+            
             return _convertApi.ConvertAsync(srcFormat, cfg.DestinationFormat, convertParams)
                 .ContinueWith(tr =>
                 {
+                    _concSem.Release();
                     if (tr.IsCompletedSuccessfully)
                     {
                         try

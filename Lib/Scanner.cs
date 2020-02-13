@@ -12,6 +12,8 @@ namespace Lib
 {
     internal static class Scanner
     {
+        private static SemaphoreSlim _concSem = new SemaphoreSlim(2);    // 2 is the best parallel upload performance
+
         /// <summary>
         /// Creates ConvertApiFileParam from local files (unzips if needed) and removes
         /// </summary>
@@ -97,13 +99,15 @@ namespace Lib
 
         private static List<ConvertApiFileParam> FilesToParams(List<FileInfo> readyFiles)
         {
-            return readyFiles.Select(f =>
+            return readyFiles.OrderBy(f => f.Length).Select(f =>
             {
+                _concSem.Wait();
                 var fp = new ConvertApiFileParam(f);
 
                 // Delete uploaded file from local file system
                 fp.GetValueAsync().ContinueWith(fm =>
                 {
+                    _concSem.Release();
                     try
                     {
                         var dir = f.Directory;
