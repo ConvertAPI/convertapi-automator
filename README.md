@@ -174,11 +174,13 @@ _Example:_
 
 _config.txt_
 ```text
-PdfUserPasswordNew=mysecretpass
+PdfOwnerPasswordNew=mysecretpass1
+PdfUserPasswordNew=mysecretpass2
 EncryptType=AES256ISO
 ```
 
-Parameters are specific to conversion type. Parameters with the description can be found on https://www.convertapi.com site.
+Parameters are specific to conversion type.
+Parameters with the description can be found on [convertapi.com](https://www.convertapi.com/conversions) site.
 
 There are built in parameters that are used just by convertapi-automator:
 - **JoinFiles** - wait for all files from the parent directory and use them in one conversion (must be used with `merge` conversion). Default: `JoinFiles=false` 
