@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Text.RegularExpressions;
+using System.Windows.Input;
 
 namespace WinConfig
 {
@@ -16,16 +18,36 @@ namespace WinConfig
         public MainWindow()
         {
             InitializeComponent();
-            ExecFileInput.Text = Path.Combine(Directory.GetCurrentDirectory(), "convertapi-automator.exe");
-                
+
+            Config config;
+            try
+            {
+                config = new Config(ParseArgs(ServiceCmd()));
+            }
+            catch
+            {
+                config = new Config();
+                var dirPath = Directory.GetCurrentDirectory();
+                var exePath = Path.Combine(dirPath, "convertapi-automator.exe");
+                if (File.Exists(exePath))
+                {
+                    config.ExeFile = new FileInfo(exePath);
+                }
+            }
+
+            config.Active = ServiceRunning();
+            ConfigToControls(config);
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private bool ServiceRunning()
         {
-
-            // Display the command output.
-            Label1.Content = ServiceCmd();
-
+            var result = false;
+            try
+            {
+                var cmdOut = ExecSc($"query {Config.ServiceName}");
+                result = cmdOut.Single(l => l.Contains("STATE")).Split(" : ").Contains("RUNNING");
+            } catch {}
+            return result;
         }
 
         private void DeleteService(Config config)
@@ -68,9 +90,9 @@ namespace WinConfig
             var proc = new System.Diagnostics.Process();
             proc.StartInfo = procStartInfo;
             proc.Start();
-            var cmdOut = proc.StandardOutput.ReadToEnd().Split("\r\n");
-            if (proc.ExitCode != 0) throw new Exception(proc.StandardError.ReadToEnd());
-            return cmdOut;
+            var cmdOut = proc.StandardOutput.ReadToEnd();
+            if (proc.ExitCode != 0) throw new Exception(cmdOut);
+            return cmdOut.Split("\r\n");
         }
 
         private IEnumerable<IEnumerable<string>> ParseArgs(string cmdLine)
@@ -94,8 +116,33 @@ namespace WinConfig
             CommonOpenFileDialog dialog = new CommonOpenFileDialog() { IsFolderPicker = true };
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                DirListBox.Items.Add(dialog.FileName);
+                if (DirListBox.Items.IndexOf(dialog.FileName) == -1)
+                {
+                    DirListBox.Items.Add(dialog.FileName);
+                }
             }
         }
+
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+        private void ConfigToControls(Config config)
+        {
+            ExecFileInput.Text = config.ExeFile?.FullName ?? String.Empty;
+            SecretInput.Text = config.Secret;
+            config.Dirs.ForEach(d => DirListBox.Items.Add(d.FullName));
+            MaxConcSpin.Value = config.Concurrency;
+            LevelSpin.Value = config.Level;
+            AutostartCheckBox.IsChecked = config.Autostart;
+            ActiveCheckBox.IsChecked = config.Active;
+        }
+
+        private void RemoveDirBtn_Click(object sender, RoutedEventArgs e)
+        {
+            DirListBox.Items.Remove(DirListBox.SelectedItem);
+        }
     }
+
 }

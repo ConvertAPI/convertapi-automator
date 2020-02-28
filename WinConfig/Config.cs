@@ -14,14 +14,11 @@ namespace WinConfig
         public int Level { get; set; } = 0;
         public int Concurrency { get; set; } = 10;
         public bool Autostart { get; set; } = true;
+        public bool Active { get; set; }
         public string AutostartStr() => Autostart ? "auto" : "demand";
 
-        public Config(string secret, List<DirectoryInfo> dirs, int level, int concurrency)
+        public Config()
         {
-            Secret = secret;
-            Dirs = dirs;
-            Level = level;
-            Concurrency = concurrency;
         }
 
         public Config(IEnumerable<IEnumerable<string>> args)

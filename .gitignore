@@ -6,8 +6,10 @@
 /obj
 /.vs
 /Properties
-/Cli/bin/Debug/netcoreapp3.1
+/Cli/bin
 /Cli/obj
 /Cli/Properties
-/Lib/bin/Debug/netcoreapp3.1
+/Lib/bin
 /Lib/obj
+/WinConfig/bin
+/WinConfig/obj

@@ -3,16 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Convertapi Automator Windows service configurator" Height="399" Width="559" WindowStartupLocation="CenterScreen">
-    <Grid Margin="0,0,0,0" Height="277">
-        <Button x:Name="ApplyBtn" Content="Apply" HorizontalAlignment="Right" Height="21" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="58" Click="Button_Click_1"/>
-        <Label x:Name="Label1" Content="Input directories" Height="31" Margin="10,60,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="205"/>
-        <Label Content="Path to convertapi-automator.exe" HorizontalAlignment="Left" Height="26" Margin="10,10,0,0" VerticalAlignment="Top" Width="205"/>
-        <TextBox x:Name="ExecFileInput" Margin="220,10,40,0" Text="TextBox" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
-        <Button x:Name="SelectExeFileBtn" Content="..." Height="26" Margin="0,10,10,0" VerticalAlignment="Top" Click="SelectExeFileBtn_Click" HorizontalAlignment="Right" Width="25"/>
-        <ListBox x:Name="DirListBox" Margin="220,60,10,138"/>
-        <Button x:Name="AddDirBtn" Content="Add" Margin="220,0,0,107" HorizontalAlignment="Left" Width="60" Height="26" VerticalAlignment="Bottom" Click="AddDirBtn_Click"/>
-        <Button x:Name="RemoveDirBtn" Content="Remove" Margin="285,0,0,107" HorizontalAlignment="Left" Width="70" Height="26" VerticalAlignment="Bottom"/>
+        Title="Convertapi Automator Windows service configurator" Height="500"   
+        Width="600" 
+        MinHeight="500" MinWidth="400"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Label x:Name="Label1" Content="Input directories (ATTENTION: During conversion all files inside these directories will be DELETED!)" Margin="20,159,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="5"/>
+        <Label Content="Path to convertapi-automator.exe" HorizontalAlignment="Left" Margin="20,12,0,0" VerticalAlignment="Top" Padding="5" Height="26" Width="188"/>
+        <TextBox x:Name="ExecFileInput" Margin="20,43,44,0" TextWrapping="NoWrap" VerticalAlignment="Top" MaxLines="1" TextAlignment="Left" Padding="5" Height="28"/>
+        <Button x:Name="SelectExeFileBtn" Content="..." Margin="0,43,19,0" VerticalAlignment="Top" Click="SelectExeFileBtn_Click" Padding="5" Height="28" HorizontalAlignment="Right" Width="20"/>
+        <ListBox x:Name="DirListBox" Margin="20,190,19,198"/>
+        <Button x:Name="AddDirBtn" Content="Add" Margin="0,0,79,165" VerticalAlignment="Bottom" Click="AddDirBtn_Click" HorizontalAlignment="Right" Padding="5" Height="28" Width="34"/>
+        <Button x:Name="RemoveDirBtn" Content="Remove" Margin="0,0,19,165" Padding="5" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="RemoveDirBtn_Click"/>
+        <Button x:Name="ApplyBtn" Content="Apply" Margin="0,0,19,20" Padding="5" HorizontalAlignment="Right" Width="43" Height="28" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="AutostartCheckBox" Content="Start on boot" Margin="0,0,19,116" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+        <xctk:IntegerUpDown x:Name="MaxConcSpin" Value="1" Margin="215,0,0,109" Padding="5" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="52" Minimum="1" Maximum="30" />
+        <Label x:Name="Label1_Copy" Content="Maximum concurrent conversions" Margin="20,0,0,111" Padding="5" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="189"/>
+        <xctk:IntegerUpDown x:Name="LevelSpin" Value="0" Margin="215,0,0,66" Padding="5" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="52" Minimum="0" />
+        <Label x:Name="Label1_Copy1" Content="Input directory level" Margin="20,0,0,70" Padding="5" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="116"/>
+        <Label Content="Convertapi secret" HorizontalAlignment="Left" Margin="20,100,0,0" VerticalAlignment="Top" Padding="5"/>
+        <TextBox x:Name="SecretInput" Margin="127,99,19,0" TextWrapping="NoWrap" VerticalAlignment="Top" MaxLines="1" TextAlignment="Left" Padding="5"/>
+        <CheckBox x:Name="ActiveCheckBox" Content="Active" Margin="0,0,57,75" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
     </Grid>
 </Window>
