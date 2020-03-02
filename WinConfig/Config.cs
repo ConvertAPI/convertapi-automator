@@ -21,8 +21,10 @@ namespace WinConfig
         {
         }
 
-        public Config(IEnumerable<IEnumerable<string>> args)
+        public Config(string exec, IEnumerable<IEnumerable<string>> args)
         {
+            this.ExeFile = new FileInfo(exec);
+
             foreach (var a in args) {
                 switch (a.First())
                 {
@@ -46,7 +48,7 @@ namespace WinConfig
         public string Cmd()
         {
             var dirs = String.Join(" ", Dirs.Select(d => $"--dir='{d.FullName}'"));
-            return $"{ExeFile} --secret={Secret} --level={Level} --concurrency={Concurrency} {dirs}";
+            return $"{ExeFile} --watch --secret={Secret} --level={Level} --concurrency={Concurrency} {dirs}";
         }
 
     }

@@ -7,6 +7,7 @@ using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
+using System.Threading;
 
 namespace WinConfig
 {
@@ -22,7 +23,8 @@ namespace WinConfig
             Config config;
             try
             {
-                config = new Config(ParseArgs(ServiceCmd()));
+                var cmd = ParseArgs(Sc.ServiceCmd());
+                config = new Config(cmd.exec, cmd.args);
             }
             catch
             {
@@ -35,72 +37,8 @@ namespace WinConfig
                 }
             }
 
-            config.Active = ServiceRunning();
+            config.Active = Sc.Running();
             ConfigToControls(config);
-        }
-
-        private bool ServiceRunning()
-        {
-            var result = false;
-            try
-            {
-                var cmdOut = ExecSc($"query {Config.ServiceName}");
-                result = cmdOut.Single(l => l.Contains("STATE")).Split(" : ").Contains("RUNNING");
-            } catch {}
-            return result;
-        }
-
-        private void DeleteService(Config config)
-        {
-            ExecSc($"delete {Config.ServiceName}");
-        }
-
-        private void StopService(Config config)
-        {
-            ExecSc($"stop {Config.ServiceName}");
-        }
-
-        private void StartService(Config config)
-        {
-            ExecSc($"start {Config.ServiceName}");
-        }
-
-        private void UpdateService(Config config)
-        {
-            ExecSc($"config {Config.ServiceName} start={(config.Autostart ? "auto" : "demand")} binPath={config.Cmd()}");
-        }
-
-        private void RegisterService(Config config)
-        {
-            ExecSc($"create {Config.ServiceName} start={config.AutostartStr()} binPath={config.Cmd()}");
-        }
-
-        private string ServiceCmd()
-        {
-            var cmdOut = ExecSc($"qc {Config.ServiceName}");
-            return cmdOut.Single(l => l.Contains("BINARY_PATH_NAME")).Split(" : ").Last().Trim();
-        }
-
-        private IEnumerable<string> ExecSc(string args)
-        {
-            var procStartInfo = new System.Diagnostics.ProcessStartInfo("sc.exe", args);
-            procStartInfo.RedirectStandardOutput = true;
-            procStartInfo.UseShellExecute = false;
-            procStartInfo.CreateNoWindow = true;
-            var proc = new System.Diagnostics.Process();
-            proc.StartInfo = procStartInfo;
-            proc.Start();
-            var cmdOut = proc.StandardOutput.ReadToEnd();
-            if (proc.ExitCode != 0) throw new Exception(cmdOut);
-            return cmdOut.Split("\r\n");
-        }
-
-        private IEnumerable<IEnumerable<string>> ParseArgs(string cmdLine)
-        {
-            return cmdLine.Split("--").Skip(1)
-                .Select(p =>
-                    p.Trim().Split("=").Select(i => i.Trim())
-                );
         }
 
         private void SelectExeFileBtn_Click(object sender, RoutedEventArgs e)
@@ -139,10 +77,75 @@ namespace WinConfig
             ActiveCheckBox.IsChecked = config.Active;
         }
 
+        private Config ControlsToConfig()
+        {
+            var config = new Config();
+
+            if (File.Exists(ExecFileInput.Text))
+            {
+                config.ExeFile = new FileInfo(ExecFileInput.Text);
+            }
+
+            config.Secret = SecretInput.Text;
+            config.Dirs = DirListBox.Items.Cast<string>()
+                .Where(i => Directory.Exists(i))
+                .Select(i => new DirectoryInfo(i)).ToList();
+
+            config.Concurrency = MaxConcSpin.Value.GetValueOrDefault();
+            config.Level = LevelSpin.Value.GetValueOrDefault();
+            config.Autostart = AutostartCheckBox.IsChecked.GetValueOrDefault();
+            config.Active = ActiveCheckBox.IsChecked.GetValueOrDefault();
+
+            return config;
+        }
+
         private void RemoveDirBtn_Click(object sender, RoutedEventArgs e)
         {
             DirListBox.Items.Remove(DirListBox.SelectedItem);
         }
+
+        private void ApplyBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var config = ControlsToConfig();
+            if (Sc.Installed())
+            {
+                if (Sc.Running())
+                {
+                    Sc.Stop();
+                }
+                Sc.UpdateService(config);
+            } else
+            {
+                Sc.Install(config);
+            }
+
+            if (config.Active)
+            {
+                
+                try
+                {
+                    Thread.Sleep(1000);
+                    Sc.Start();
+                }
+                catch
+                {
+                    Thread.Sleep(2000);
+                    Sc.Start();
+                }
+            }
+        }
+
+        public static (string exec, IEnumerable<IEnumerable<string>> args) ParseArgs(string cmdLine)
+        {
+            var arr = cmdLine.Split("--");
+            var args = cmdLine.Split("--").Skip(1)
+                .Select(p =>
+                    p.Trim().Split("=").Select(i => i.Trim())
+                );
+
+            return (arr.First(), args);
+        }
+
     }
 
 }

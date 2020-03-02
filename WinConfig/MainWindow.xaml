@@ -17,7 +17,7 @@
         <ListBox x:Name="DirListBox" Margin="20,190,19,198"/>
         <Button x:Name="AddDirBtn" Content="Add" Margin="0,0,79,165" VerticalAlignment="Bottom" Click="AddDirBtn_Click" HorizontalAlignment="Right" Padding="5" Height="28" Width="34"/>
         <Button x:Name="RemoveDirBtn" Content="Remove" Margin="0,0,19,165" Padding="5" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="RemoveDirBtn_Click"/>
-        <Button x:Name="ApplyBtn" Content="Apply" Margin="0,0,19,20" Padding="5" HorizontalAlignment="Right" Width="43" Height="28" VerticalAlignment="Bottom"/>
+        <Button x:Name="ApplyBtn" Content="Apply" Margin="0,0,19,20" Padding="5" HorizontalAlignment="Right" Width="43" Height="28" VerticalAlignment="Bottom" Click="ApplyBtn_Click"/>
         <CheckBox x:Name="AutostartCheckBox" Content="Start on boot" Margin="0,0,19,116" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
         <xctk:IntegerUpDown x:Name="MaxConcSpin" Value="1" Margin="215,0,0,109" Padding="5" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="52" Minimum="1" Maximum="30" />
         <Label x:Name="Label1_Copy" Content="Maximum concurrent conversions" Margin="20,0,0,111" Padding="5" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="189"/>
