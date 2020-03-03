@@ -24,7 +24,7 @@ namespace WinConfig
             try
             {
                 var cmdOut = ExecSc($"query {Config.ServiceName}");
-                result = cmdOut.Single(l => l.Contains("STATE")).Split(" : ").Contains("RUNNING");
+                result = cmdOut.Single(l => l.Contains("STATE")).Split(" : ").Last().Contains("RUNNING");
             }
             catch { }
             return result;

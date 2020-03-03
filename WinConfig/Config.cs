@@ -47,7 +47,7 @@ namespace WinConfig
 
         public string Cmd()
         {
-            var dirs = String.Join(" ", Dirs.Select(d => $"--dir='{d.FullName}'"));
+            var dirs = String.Join(" ", Dirs.Select(d => $"--dir=\"{d.FullName}\""));
             return $"{ExeFile} --watch --secret={Secret} --level={Level} --concurrency={Concurrency} {dirs}";
         }
 

@@ -106,32 +106,42 @@ namespace WinConfig
 
         private void ApplyBtn_Click(object sender, RoutedEventArgs e)
         {
-            var config = ControlsToConfig();
-            if (Sc.Installed())
+            try
             {
-                if (Sc.Running())
+                var config = ControlsToConfig();
+                if (Sc.Installed())
                 {
-                    Sc.Stop();
+                    if (Sc.Running())
+                    {
+                        Sc.Stop();
+                    }
+                    Sc.UpdateService(config);
                 }
-                Sc.UpdateService(config);
-            } else
-            {
-                Sc.Install(config);
-            }
+                else
+                {
+                    Sc.Install(config);
+                }
 
-            if (config.Active)
+                if (config.Active)
+                {
+
+                    try
+                    {
+                        Thread.Sleep(1000);
+                        Sc.Start();
+                    }
+                    catch
+                    {
+                        Thread.Sleep(2000);
+                        Sc.Start();
+                    }
+                }
+
+                MessageBox.Show("Service successfully updated.", "Convertapi Automator", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception err)
             {
-                
-                try
-                {
-                    Thread.Sleep(1000);
-                    Sc.Start();
-                }
-                catch
-                {
-                    Thread.Sleep(2000);
-                    Sc.Start();
-                }
+                MessageBox.Show(err.Message, "Convertapi Automator", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
