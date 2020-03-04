@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib", "Lib\Lib.csproj", "{8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinConfig", "WinConfig\WinConfig.csproj", "{876DECAE-4DCD-4B91-AA93-E8A9E79E9088}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WinInstall", "WinInstall\WinInstall.vdproj", "{2A81DC8F-2747-4F5F-A5FC-4449278EE2FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,12 @@ Global
 		{876DECAE-4DCD-4B91-AA93-E8A9E79E9088}.Release|x64.Build.0 = Release|x64
 		{876DECAE-4DCD-4B91-AA93-E8A9E79E9088}.Release|x86.ActiveCfg = Release|Any CPU
 		{876DECAE-4DCD-4B91-AA93-E8A9E79E9088}.Release|x86.Build.0 = Release|Any CPU
+		{2A81DC8F-2747-4F5F-A5FC-4449278EE2FE}.Debug|Any CPU.ActiveCfg = Debug
+		{2A81DC8F-2747-4F5F-A5FC-4449278EE2FE}.Debug|x64.ActiveCfg = Debug
+		{2A81DC8F-2747-4F5F-A5FC-4449278EE2FE}.Debug|x86.ActiveCfg = Debug
+		{2A81DC8F-2747-4F5F-A5FC-4449278EE2FE}.Release|Any CPU.ActiveCfg = Release
+		{2A81DC8F-2747-4F5F-A5FC-4449278EE2FE}.Release|x64.ActiveCfg = Release
+		{2A81DC8F-2747-4F5F-A5FC-4449278EE2FE}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
