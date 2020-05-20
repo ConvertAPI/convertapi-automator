@@ -16,9 +16,9 @@ Files can also be supplied in the `zip` archive, automator will unzip it for you
 
 Download compressed executable
 
-* Linux: [convertapi-automator_linux.tar.gz](https://github.com/ConvertAPI/convertapi-automator/releases/download/v4/convertapi-automator_linux.tar.gz)
-* Mac OS X: [convertapi-automator_osx.tar.gz](https://github.com/ConvertAPI/convertapi-automator/releases/download/v4/convertapi-automator_osx.tar.gz)
-* Windows: [convertapi-automator_win.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v4/convertapi-automator_win.zip)
+* Linux: [convertapi-automator_linux.tar.gz](https://github.com/ConvertAPI/convertapi-automator/releases/download/v6/convertapi-automator_linux.tar.gz)
+* Mac OS X: [convertapi-automator_osx.tar.gz](https://github.com/ConvertAPI/convertapi-automator/releases/download/v6/convertapi-automator_osx.tar.gz)
+* Windows: [convertapi-automator_win.zip](https://github.com/ConvertAPI/convertapi-automator/releases/download/v6/convertapi-automator_win.zip)
 
 (this utility can also be built from the source code for many other CPU and OS)
 
