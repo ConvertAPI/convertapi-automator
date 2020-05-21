@@ -18,6 +18,6 @@ cd ..
 dotnet publish --configuration Release --runtime win-x64 --self-contained --output=bin /p:PublishReadyToRun=false /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugBuild=false /p:DebugSymbols=false /p:DebugType=None Cli
 cd bin
 mv Cli.exe convertapi-automator.exe
-zip -9 -j convertapi-automator_win.zip convertapi-automator.exe ../Cli/register-win-service.bat
+zip -9 -j convertapi-automator_win.zip convertapi-automator.exe ../Cli/register-win-service.bat ../Cli/uninstall-win-service.bat
 rm convertapi-automator.exe
 cd ..
