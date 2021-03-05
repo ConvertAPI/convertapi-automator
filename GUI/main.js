@@ -11,6 +11,7 @@ const {app, BrowserWindow, Menu, ipcMain, dialog, shell} = electron;
 
 let mainWindow;
 let enterSecretWindow;
+let settingsWindow;
 let automatorProcess;
 
 // Listen for app to be ready
@@ -71,9 +72,33 @@ function createSecretWindow() {
   enterSecretWindow.on('close', function(){
     enterSecretWindow = null;
   });
-  // mainWindow.webContents.on('did-finish-load', function () {
-  //   mainWindow.webContents.send('blur:on');
-  // });
+}
+
+function createSettingsWindow() {
+  settingsWindow = new BrowserWindow({
+    icon: path.join(__dirname, 'assets', 'icons', 'png', 'icon.png'),
+    width: 600,
+    height:300,
+    title:'ConvertAPI Settings',
+    frame: true,
+    parent: mainWindow,
+    modal: true,
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+  settingsWindow.setMenuBarVisibility(false);
+  settingsWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'components', 'Settings', 'settings.html'),
+    protocol: 'file:',
+    slashes:true
+  }));
+  // Handle garbage collection
+  settingsWindow.on('close', function(){
+    settingsWindow = null;
+  });
 }
 
 // Catch secret:add
@@ -102,13 +127,22 @@ ipcMain.on('files:add', function(){
     if(!result.canceled) {
       for(let i = 0; i < result.filePaths.length; i++) {
         // File destination.txt will be created or overwritten by default.
-        fs.copyFile(result.filePaths[0], "C:\\Documents\\sample.pdf", (err) => {
+        fs.copyFile(result.filePaths[0], "C:\\Documents\\" + result.filePaths[0].replace(/^.*[\\\/]/, ''), (err) => {
           if (err) throw err;
         });
       }
     }
 
   })
+});
+
+ipcMain.on('settings:open', function(){
+  createSettingsWindow();
+});
+
+ipcMain.on('settings:close', function(){
+  settingsWindow.close();
+  settingsWindow = null;
 });
 
 ipcMain.on('open:folder', function(e, path) {

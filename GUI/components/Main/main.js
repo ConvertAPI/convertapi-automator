@@ -1,5 +1,7 @@
 const electron = require('electron');
 const {ipcRenderer} = electron;
+
+document.querySelector('.js-open-settings').addEventListener('click', (e) => { ipcRenderer.send('settings:open'); });
 let workflows = document.querySelectorAll('.js-workflow');
 
 for(var i = 0; i < workflows.length; i++) {
