@@ -4,6 +4,7 @@
   <title>ConvertAPI Workflows</title>
   <link rel="stylesheet" href="../../assets/css/materialize.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="./main.js" defer></script>
 </head>
 <body class="">
   <nav>
@@ -53,22 +54,5 @@
     </div>
     <a class="btn-floating btn-large waves-effect waves-light right"><i class="material-icons">add</i></a>
   </div>
-  <script>
-    const electron = require('electron');
-    const {ipcRenderer, shell} = electron;
-    let workflows = document.querySelectorAll('.js-workflow');
-    for(var i = 0; i < workflows.length; i++) {
-      workflows[i].querySelector('.js-open-folder').addEventListener('click', (e) => { shell.showItemInFolder(e.target.getAttribute('data-path')); });
-      workflows[i].querySelector('.js-select-files').addEventListener('click', (e) => { ipcRenderer.send('files:add', e.target.getAttribute('data-path')) });
-    }
-    ipcRenderer.on('blur:off', () => {
-      console.log('blur off')
-      document.body.className = `${document.body.className} authenticated`;
-    });
-    ipcRenderer.on('blur:on', () => {
-      console.log('blur')
-      document.body.className = 'blur';
-    });
-  </script>
 </body>
 </html>
