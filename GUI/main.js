@@ -5,13 +5,13 @@ const url = require('url');
 // SET ENV
 process.env.NODE_ENV = 'development';
 
+const fs = require('fs');
 const child = require('child_process').execFile;
-const {app, BrowserWindow, Menu, ipcMain, shell, dialog} = electron;
+const {app, BrowserWindow, Menu, ipcMain, dialog, shell} = electron;
 
 let mainWindow;
 let enterSecretWindow;
 let automatorProcess;
-let secret;
 
 // Listen for app to be ready
 app.on('ready', function() {
@@ -19,6 +19,12 @@ app.on('ready', function() {
   mainWindow = new BrowserWindow({
     icon: path.join(__dirname, 'assets', 'icons', 'win', 'icon.ico'),
     width: 1100,
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      contextIsolation: false,
+      sandbox: false
+    }
   });
   mainWindow.setIcon(path.join(__dirname, 'assets', 'icons', 'png', 'icon.png'));
   // Load html in window
@@ -47,8 +53,13 @@ function createSecretWindow() {
     height:250,
     title:'Sign In',
     frame: false,
-    parent: mainWindow, 
-    modal: true
+    parent: mainWindow,
+    modal: true,
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    },
   });
   enterSecretWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'components', 'Login', 'login.html'),
@@ -82,13 +93,24 @@ ipcMain.on('secret:add', function(e, secretKey){
 });
 
 // Catch files:add
-ipcMain.on('files:add', function(e, secretKey){
+ipcMain.on('files:add', function(){
   // open file select dialog
   dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
   .then(result => {
-    console.log(result.canceled)
-    console.log(result.filePaths)
+    if(!result.canceled) {
+      for(let i = 0; i < result.filePaths.length; i++) {
+        // File destination.txt will be created or overwritten by default.
+        fs.copyFile(result.filePaths[0], "C:\\Documents\\sample.pdf", (err) => {
+          if (err) throw err;
+        });
+      }
+    }
+
   })
+});
+
+ipcMain.on('open:folder', function(e, path) {
+  shell.showItemInFolder(path);
 });
 
 // Create menu template

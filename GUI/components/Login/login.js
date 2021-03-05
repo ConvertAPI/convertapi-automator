@@ -3,7 +3,7 @@ const { ipcRenderer, shell } = electron;
 const secret = document.querySelector('#secret');
 
 document.querySelector('form').addEventListener('submit', submitForm);
-document.getElementById('get-secret').addEventListener('click', () => { shell.openExternal('https://www.convertapi.com/a/signup') });
+document.getElementById('get-secret').addEventListener('click', () => { shell.openExternal('https://www.convertapi.com/a/signup'); });
 
 function submitForm(e) {
   e.preventDefault();
