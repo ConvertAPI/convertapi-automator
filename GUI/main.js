@@ -19,6 +19,7 @@ app.on('ready', function() {
   mainWindow = new BrowserWindow({
     icon: path.join(__dirname, 'assets', 'icons', 'win', 'icon.ico'),
     width: 1100,
+    opacity: 0.8,
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
@@ -70,9 +71,9 @@ function createSecretWindow() {
   enterSecretWindow.on('close', function(){
     enterSecretWindow = null;
   });
-  mainWindow.webContents.on('did-finish-load', function () {
-    mainWindow.webContents.send('blur:on');
-  });
+  // mainWindow.webContents.on('did-finish-load', function () {
+  //   mainWindow.webContents.send('blur:on');
+  // });
 }
 
 // Catch secret:add
@@ -88,8 +89,9 @@ ipcMain.on('secret:add', function(e, secretKey){
       console.log(data.toString());
     });
     mainWindow.webContents.send('blur:off');
-  enterSecretWindow.close(); 
-  enterSecretWindow = null;
+    mainWindow.setOpacity(1);
+    enterSecretWindow.close(); 
+    enterSecretWindow = null;
 });
 
 // Catch files:add
@@ -110,6 +112,7 @@ ipcMain.on('files:add', function(){
 });
 
 ipcMain.on('open:folder', function(e, path) {
+  console.log('Opening path: ' + path);
   shell.showItemInFolder(path);
 });
 
