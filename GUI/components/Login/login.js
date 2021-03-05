@@ -11,7 +11,6 @@ function submitForm(e) {
   if (secret.value) {
     fetch('https://v2.convertapi.com/user?Secret=' + secret.value)
       .then(function (response) {
-        console.log(response);
         if (response.ok && response.status == 200)
           return response.json();
         else {

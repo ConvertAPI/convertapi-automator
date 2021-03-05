@@ -1,9 +1,23 @@
+@import "components/variables";
+
 .helper-text {
     position: relative;
     min-height: 18px;
     display: block;
     font-size: 12px;
     color: rgba(0,0,0,0.54);
+}
+
+.cursor-pointer {
+    cursor:pointer;
+}
+
+.blur {
+    transition: filter 300ms;
+    filter: blur(0.5rem);
+    &.authenticated {
+        filter: blur(0);
+    }
 }
 
 .blue {

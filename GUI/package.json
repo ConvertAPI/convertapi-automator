@@ -13,7 +13,7 @@
   "author": "UAB Baltsoft",
   "license": "MIT",
   "mac": {
-    "icon": "./assets/icons/mac/icon.icns", 
+    "icon": "./assets/icons/mac/icon.icns",
     "category": "public.app-category.utilities"
   },
   "win": {
