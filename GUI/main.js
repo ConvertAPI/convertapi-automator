@@ -14,12 +14,12 @@ let enterSecretWindow;
 app.on('ready', function() {
   // Create new window
   mainWindow = new BrowserWindow({
-    icon: path.join(__dirname, '/assets/icons/win/icon.ico')
+    icon: path.join(__dirname, 'assets', 'icons', 'win', 'icon.ico')
   });
-  mainWindow.setIcon(path.join(__dirname, '/assets/icons/png/icon.png'));
+  mainWindow.setIcon(path.join(__dirname, 'assets', 'icons', 'png', 'icon.png'));
   // Load html in window
   mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'mainWindow.html'),
+    pathname: path.join(__dirname, 'components', 'Main', 'main.html'),
     protocol: 'file:',
     slashes:true
   }));
@@ -46,7 +46,7 @@ function createSecretWindow(){
     modal: true
   });
   enterSecretWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'enterSecretWindow.html'),
+    pathname: path.join(__dirname, 'components', 'Login', 'login.html'),
     protocol: 'file:',
     slashes:true
   }));
