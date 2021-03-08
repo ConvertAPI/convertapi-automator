@@ -1,24 +1,35 @@
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
+const fs = require('fs');
+const {app, BrowserWindow, Menu, ipcMain, dialog, shell, Tray} = electron;
+const AutoLaunch = require('auto-launch');
+const login = require('./main-process/Login/login');
 
 // SET ENV
 process.env.NODE_ENV = 'development';
-
-const fs = require('fs');
-const child = require('child_process').execFile;
-const {app, BrowserWindow, Menu, ipcMain, dialog, shell} = electron;
-
+const icon = process.platform == 'win32' ? path.join(__dirname, 'assets', 'icons', 'win', 'icon.ico') : path.join(__dirname, 'assets', 'icons', 'png', 'icon.png');
 let mainWindow;
-let enterSecretWindow;
 let settingsWindow;
 let automatorProcess;
 
 // Listen for app to be ready
 app.on('ready', function() {
+  let autoLauncher = new AutoLaunch({
+    name: "ConvertAPI workflows"
+  });
+// Checking if autoLaunch is enabled, if not then enable it.
+  autoLauncher.isEnabled().then(function(isEnabled) {
+    if (isEnabled) return;
+    autoLauncher.enable();
+  }).catch(function (err) {
+    throw err;
+  });
+  // create system tray for allways-on application
+  createTray();
   // Create new window
   mainWindow = new BrowserWindow({
-    icon: path.join(__dirname, 'assets', 'icons', 'win', 'icon.ico'),
+    icon: icon,
     width: 1100,
     opacity: 0.8,
     webPreferences: {
@@ -28,14 +39,14 @@ app.on('ready', function() {
       sandbox: false
     }
   });
-  mainWindow.setIcon(path.join(__dirname, 'assets', 'icons', 'png', 'icon.png'));
+  mainWindow.setIcon(icon);
   // Load html in window
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'components', 'Main', 'main.html'),
     protocol: 'file:',
     slashes:true
   }));
-  createSecretWindow();
+  login.show();
   // Quit app when closed
   mainWindow.on('closed', function(){
     if(automatorProcess)
@@ -49,34 +60,25 @@ app.on('ready', function() {
   Menu.setApplicationMenu(mainMenu);
 });
 
-function createSecretWindow() {
-  enterSecretWindow = new BrowserWindow({
-    width: 350,
-    height:250,
-    title:'Sign In',
-    frame: false,
-    parent: mainWindow,
-    modal: true,
-    resizable: false,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
-    },
-  });
-  enterSecretWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'components', 'Login', 'login.html'),
-    protocol: 'file:',
-    slashes:true
-  }));
-  // Handle garbage collection
-  enterSecretWindow.on('close', function(){
-    enterSecretWindow = null;
-  });
+function createTray() {
+    const tray = new Tray(icon);
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Open GUI',
+        click: () => console.log('Open GUI')
+      },
+      {
+        label: 'Quit',
+        click: () => console.log('Quit GUI')
+      }
+    ]);
+    tray.setContextMenu(contextMenu);
+    tray.setToolTip('ConvertAPI Workflows 0.0.1');
 }
 
 function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
-    icon: path.join(__dirname, 'assets', 'icons', 'png', 'icon.png'),
+    icon: icon,
     width: 600,
     height:300,
     title:'ConvertAPI Settings',
@@ -100,24 +102,6 @@ function createSettingsWindow() {
     settingsWindow = null;
   });
 }
-
-// Catch secret:add
-ipcMain.on('secret:add', function(e, secretKey){
-    // run exe file with params
-    let level = 0;
-    let concurrency = 5;
-    let directories = "C:\\Documents\\";
-    var executablePath = "C:\\Users\\Kostelis\\Desktop\\Baltsoft\\convertapi-automator_win\\convertapi-automator.exe";
-    var parameters = ["--watch", `--secret=${secretKey}`, `--level=${level}`, `--concurrency=${concurrency}`, `--dir=${directories}`];
-    automatorProcess = child(executablePath, parameters, {shell: true}, function(err, data) {
-      console.log(err)
-      console.log(data.toString());
-    });
-    mainWindow.webContents.send('blur:off');
-    mainWindow.setOpacity(1);
-    enterSecretWindow.close(); 
-    enterSecretWindow = null;
-});
 
 // Catch files:add
 ipcMain.on('files:add', function(){
@@ -162,9 +146,15 @@ const mainMenuTemplate =  [
       },
       {
         label:'Top up your account',
-        accelerator: process.platform == 'darwin' ? 'Command+B' : 'Ctrl+B',
         click() {
           shell.openExternal('https://www.convertapi.com/a/plans')
+        }
+      },
+      {
+        label:'Settings',
+        accelerator: 'Alt+F2',
+        click() {
+          createSettingsWindow();
         }
       },
       {
@@ -179,7 +169,7 @@ const mainMenuTemplate =  [
 ];
 
 // If OSX, add empty object to menu
-if(process.platform == 'darwin'){
+if (process.platform == 'darwin') {
   mainMenuTemplate.unshift({});
 }
 
