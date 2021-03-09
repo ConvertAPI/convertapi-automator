@@ -1,59 +1,26 @@
 const electron = require('electron');
-const path = require('path');
-const url = require('url');
 const fs = require('fs');
-const {app, BrowserWindow, Menu, ipcMain, dialog, shell, Tray} = electron;
-const AutoLaunch = require('auto-launch');
-const login = require('./main-process/Login/login');
+const {app, Menu, ipcMain, dialog, shell, Tray} = electron;
+const loginWindow = require('./main-process/Login/login');
+const mainWindow = require('./main-process/Main/main');
+const settingsWindow = require('./main-process/Settings/settings');
+const Automator = require('./main-process/Automator/automator');
+const config = require('./config/config')
 
 // SET ENV
 process.env.NODE_ENV = 'development';
-const icon = process.platform == 'win32' ? path.join(__dirname, 'assets', 'icons', 'win', 'icon.ico') : path.join(__dirname, 'assets', 'icons', 'png', 'icon.png');
-let mainWindow;
-let settingsWindow;
-let automatorProcess;
 
 // Listen for app to be ready
 app.on('ready', function() {
-  let autoLauncher = new AutoLaunch({
-    name: "ConvertAPI workflows"
-  });
-// Checking if autoLaunch is enabled, if not then enable it.
-  autoLauncher.isEnabled().then(function(isEnabled) {
-    if (isEnabled) return;
-    autoLauncher.enable();
-  }).catch(function (err) {
-    throw err;
-  });
+  // initialize app windows
+  mainWindow.init();
+  if(!config.SECRET) {
+    loginWindow.init();
+  } else if(config.ACTIVE) {
+    Automator.run();
+  }
   // create system tray for allways-on application
   createTray();
-  // Create new window
-  mainWindow = new BrowserWindow({
-    icon: icon,
-    width: 1100,
-    opacity: 0.8,
-    webPreferences: {
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true,
-      contextIsolation: false,
-      sandbox: false
-    }
-  });
-  mainWindow.setIcon(icon);
-  // Load html in window
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'components', 'Main', 'main.html'),
-    protocol: 'file:',
-    slashes:true
-  }));
-  login.show();
-  // Quit app when closed
-  mainWindow.on('closed', function(){
-    if(automatorProcess)
-      automatorProcess.kill();
-    app.quit();
-  });
-
   // Build menu from template
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
   // Insert menu
@@ -61,7 +28,7 @@ app.on('ready', function() {
 });
 
 function createTray() {
-    const tray = new Tray(icon);
+    const tray = new Tray(config.ICON_PATH);
     const contextMenu = Menu.buildFromTemplate([
       {
         label: 'Open GUI',
@@ -73,38 +40,11 @@ function createTray() {
       }
     ]);
     tray.setContextMenu(contextMenu);
-    tray.setToolTip('ConvertAPI Workflows 0.0.1');
-}
-
-function createSettingsWindow() {
-  settingsWindow = new BrowserWindow({
-    icon: icon,
-    width: 600,
-    height:300,
-    title:'ConvertAPI Settings',
-    frame: true,
-    parent: mainWindow,
-    modal: true,
-    resizable: false,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
-    }
-  });
-  settingsWindow.setMenuBarVisibility(false);
-  settingsWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'components', 'Settings', 'settings.html'),
-    protocol: 'file:',
-    slashes:true
-  }));
-  // Handle garbage collection
-  settingsWindow.on('close', function(){
-    settingsWindow = null;
-  });
+    tray.setToolTip('ConvertAPI Workflows');
 }
 
 // Catch files:add
-ipcMain.on('files:add', function(){
+ipcMain.on('files:add', function() {
   // open file select dialog
   dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
   .then(result => {
@@ -120,17 +60,7 @@ ipcMain.on('files:add', function(){
   })
 });
 
-ipcMain.on('settings:open', function(){
-  createSettingsWindow();
-});
-
-ipcMain.on('settings:close', function(){
-  settingsWindow.close();
-  settingsWindow = null;
-});
-
 ipcMain.on('open:folder', function(e, path) {
-  console.log('Opening path: ' + path);
   shell.showItemInFolder(path);
 });
 
@@ -154,7 +84,7 @@ const mainMenuTemplate =  [
         label:'Settings',
         accelerator: 'Alt+F2',
         click() {
-          createSettingsWindow();
+          settingsWindow.init();
         }
       },
       {
@@ -174,7 +104,7 @@ if (process.platform == 'darwin') {
 }
 
 // Add developer tools option if in dev
-if(process.env.NODE_ENV !== 'production'){
+if(process.env.NODE_ENV !== 'production') {
   mainMenuTemplate.push({
     label: 'Developer Tools',
     submenu:[

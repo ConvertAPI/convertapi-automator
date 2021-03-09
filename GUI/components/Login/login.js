@@ -4,6 +4,7 @@ const secret = document.querySelector('#secret');
 
 document.querySelector('form').addEventListener('submit', submitForm);
 document.getElementById('get-secret').addEventListener('click', () => { shell.openExternal('https://www.convertapi.com/a/signup'); });
+ipcRenderer.send('mainWindow:blur');
 
 function submitForm(e) {
   e.preventDefault();
@@ -18,17 +19,21 @@ function submitForm(e) {
           return false;
         }
       })
-      .then(function (myJson) {
-        if(myJson) {
+      .then(function (jsonData) {
+        let secondsLeft = jsonData.SecondsLeft;
+        if(secondsLeft > 0) {
           ipcRenderer.send('secret:add', secret.value);
+        } else {
+          showValidationError('Please top up your account!');
+          return false;
         }
       });
   } else {
-    showValidationError();
+    showValidationError('Please enter your secret key');
   }
 }
 
-function showValidationError() {
+function showValidationError(message = 'Authorization error - bad secret') {
   secret.className = 'validate invalid';
-  document.getElementById('validation-error').innerText = 'Authorization error - bad secret';
+  document.getElementById('validation-error').innerText = message;
 }
