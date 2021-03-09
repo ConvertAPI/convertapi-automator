@@ -88,6 +88,15 @@ const mainMenuTemplate =  [
         }
       },
       {
+        label:'Sign out',
+        accelerator: process.platform == 'darwin' ? 'Command+L' : 'Ctrl+L',
+        click() {
+          config.saveSettings('');
+          Automator.kill();
+          loginWindow.init();
+        }
+      },
+      {
         label: 'Quit',
         accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
         click(){

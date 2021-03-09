@@ -32,7 +32,7 @@ class Config {
     saveSettings(secret, active, concurrency) {
         // create settings object to store in config.json
         let settings = {
-            secret: secret || this.SECRET,
+            secret: typeof(active) == undefined ? this.SECRET : secret,
             active: typeof(active) == undefined ? this.ACTIVE : active,
             concurrency: concurrency || this.CONCURRENCY
           };

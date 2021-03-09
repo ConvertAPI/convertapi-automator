@@ -17,13 +17,11 @@ class Automator {
                 console.log(err)
                 console.log(data.toString());
             });
-        } else {
-            console.log(this.automatorProcess)
         }
     }
 
     kill() {
-        if(this.automatorProcess) {
+        if(this.automatorProcess && !this.automatorProcess.killed) {
             console.log('AUTOMATOR kill')
             this.automatorProcess.kill();
         }
