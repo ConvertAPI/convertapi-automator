@@ -4,6 +4,7 @@ const path = require('path');
 const url = require('url');
 const config = require('../../config/config');
 const automator = require('../Automator/automator');
+const mainWindow = require('../Main/main');
 
 let settings = {};
 
@@ -24,6 +25,7 @@ function createSettingsWindow() {
       frame: true,
       modal: true,
       resizable: false,
+      parent: mainWindow.getWindow(),
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false

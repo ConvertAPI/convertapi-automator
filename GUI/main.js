@@ -15,6 +15,7 @@ app.on('ready', function() {
   // initialize app windows
   mainWindow.init();
   if(!config.SECRET) {
+    mainWindow.setOpacity(0.8);
     loginWindow.init();
   } else if(config.ACTIVE) {
     Automator.run();
