@@ -43,7 +43,7 @@ function createSettingsWindow() {
     });
   }
   
-ipcMain.on('settings:open', function(){
+  ipcMain.on('settings:open', function(){
     createSettingsWindow();
   });
   

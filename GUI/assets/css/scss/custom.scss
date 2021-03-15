@@ -55,6 +55,12 @@
 .mb-5 {
     margin-bottom:50px;
 }
+.mt-5 {
+    margin-top:50px;
+}
+.m-auto{
+    margin:auto;
+}
 .pt-1 {
     padding-top:10px;
 }
@@ -100,4 +106,46 @@
             font-weight: 600;
         }
     }
-} 
+}
+
+.workflow-editor {
+    .workflow-item {
+        padding: 2rem;
+        margin-bottom:40px;
+        position:relative;
+        .connector {
+            position:absolute;
+            width:1px;
+            height:40px;
+            border:1px dashed lightgrey;
+            left:50%;
+            bottom:-40px;
+        }
+    }
+    .workflow-item:last-child .connector:after, .workflow-wrapper:last-child .connector:after {
+        content: "";
+        width: 41px;
+        height: 41px;
+        background-image: url(../img/add-more.png);
+        background-size: cover;
+        position: absolute;
+        bottom: -25px;
+        left: -20px;
+        cursor:pointer;
+    }
+    .parameter-group {
+        margin-top:20px;
+        // border-radius: 10px;
+        border: 1px solid rgb(217, 217, 217);
+        padding: 20px 20px 20px;
+        position:relative;
+        legend {
+            position: absolute;
+            top: -11px;
+            font-size: 12px;
+            background: white;
+            padding: 0 5px;
+            color:#7e7e7e;
+        }
+    }
+}

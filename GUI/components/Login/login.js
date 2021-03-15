@@ -21,6 +21,5 @@ function showValidationError(message = 'Authorization error - bad secret') {
 }
 
 ipcRenderer.on('validation-error', (e, msg) => {
-  console.log(msg);
   showValidationError(msg);
 })

@@ -1,8 +1,11 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
 const url = require('url');
+const fs = require('fs');
 const config = require('../../config/config');
 const automator = require('../Automator/automator');
+const loginWindow = require('../Login/login');
+const workflowWindow = require('../Workflow/workflow');
 
 class Main {
   constructor() { this.window; }
@@ -26,6 +29,13 @@ class Main {
       protocol: 'file:',
       slashes:true
     }));
+
+    // open sign in if secret not provided
+    if(!config.SECRET) {
+      this.showLogin();
+    } else if(config.ACTIVE) {
+      automator.run();
+    }
   
     // Quit app when closed
     this.window.on('closed', function() {
@@ -41,7 +51,30 @@ class Main {
   getWindow() {
     return this.window;
   }
+
+  showLogin() {
+    loginWindow.init(this.window);
+  }
 };
 
+ipcMain.on('open:folder', function(e, path) {
+  shell.showItemInFolder(path);
+});
+
+// Catch files:add
+ipcMain.on('files:add', function() {
+  // open file select dialog
+  dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
+  .then(result => {
+    if(!result.canceled) {
+      for(let i = 0; i < result.filePaths.length; i++) {
+        // File destination.txt will be created or overwritten by default.
+        fs.copyFile(result.filePaths[0], "C:\\Documents\\" + result.filePaths[0].replace(/^.*[\\\/]/, ''), (err) => {
+          if (err) throw err;
+        });
+      }
+    }
+  })
+});
 
 module.exports = new Main();

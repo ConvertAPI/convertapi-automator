@@ -1,6 +1,5 @@
 const child = require('child_process').execFile;
 const config = require('../../config/config');
-const {ipcMain} = require('electron');
 
 class Automator {
     constructor() {

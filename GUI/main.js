@@ -1,7 +1,5 @@
 const electron = require('electron');
-const fs = require('fs');
-const {app, Menu, ipcMain, dialog, shell, Tray} = electron;
-const loginWindow = require('./main-process/Login/login');
+const {app, Menu, ipcMain, shell, Tray} = electron;
 const mainWindow = require('./main-process/Main/main');
 const settingsWindow = require('./main-process/Settings/settings');
 const Automator = require('./main-process/Automator/automator');
@@ -14,12 +12,6 @@ process.env.NODE_ENV = 'development';
 app.on('ready', function() {
   // initialize app windows
   mainWindow.init();
-  if(!config.SECRET) {
-    mainWindow.setOpacity(0.8);
-    loginWindow.init();
-  } else if(config.ACTIVE) {
-    Automator.run();
-  }
   // create system tray for allways-on application
   createTray();
   // Build menu from template
@@ -43,27 +35,6 @@ function createTray() {
     tray.setContextMenu(contextMenu);
     tray.setToolTip('ConvertAPI Workflows');
 }
-
-// Catch files:add
-ipcMain.on('files:add', function() {
-  // open file select dialog
-  dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
-  .then(result => {
-    if(!result.canceled) {
-      for(let i = 0; i < result.filePaths.length; i++) {
-        // File destination.txt will be created or overwritten by default.
-        fs.copyFile(result.filePaths[0], "C:\\Documents\\" + result.filePaths[0].replace(/^.*[\\\/]/, ''), (err) => {
-          if (err) throw err;
-        });
-      }
-    }
-
-  })
-});
-
-ipcMain.on('open:folder', function(e, path) {
-  shell.showItemInFolder(path);
-});
 
 // Create menu template
 const mainMenuTemplate =  [
@@ -94,7 +65,7 @@ const mainMenuTemplate =  [
         click() {
           config.saveSettings('');
           Automator.kill();
-          loginWindow.init();
+          mainWindow.showLogin();
         }
       },
       {

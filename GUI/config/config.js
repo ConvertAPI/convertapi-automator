@@ -8,6 +8,7 @@ class Config {
                             : process.platform == 'darwin' ? path.join(__dirname, '../executables', 'mac', 'convertapi-automator_osx.tar')
                             : path.join(__dirname, '..', 'executables', 'linux', 'convertapi-automator_linux.tar');
     ICON_PATH = process.platform == 'win32' ? path.join(__dirname, '..', 'assets', 'icons', 'win', 'icon.ico') : path.join(__dirname, '../assets', 'icons', 'png', 'icon.png');
+    CARA_PATH = 'https://stag-v2.convertapi.com/';
     SECRET = '';
     ACTIVE = true;
     CONCURRENCY = 10;
@@ -32,11 +33,12 @@ class Config {
     saveSettings(secret, active, concurrency) {
         // create settings object to store in config.json
         let settings = {
-            secret: typeof(active) == undefined ? this.SECRET : secret,
+            secret: typeof(secret) == undefined ? this.SECRET : secret,
             active: typeof(active) == undefined ? this.ACTIVE : active,
             concurrency: concurrency || this.CONCURRENCY
           };
-
+          console.log('saving settings');
+          console.log(settings);
           // set global settings
           this.ACTIVE = settings.active;
           this.SECRET = settings.secret;
