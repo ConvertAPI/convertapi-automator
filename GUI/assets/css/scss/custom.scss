@@ -70,6 +70,9 @@
 .d-block {
     display: block;
 }
+.hidden {
+    display:none;
+}
 .border-dashed {
     border: 2px dashed #cac7c7;
 }
@@ -122,7 +125,7 @@
             bottom:-40px;
         }
     }
-    .workflow-item:last-child .connector:after, .workflow-wrapper:last-child .connector:after {
+    .workflow-item:last-child .connector:after {
         content: "";
         width: 41px;
         height: 41px;

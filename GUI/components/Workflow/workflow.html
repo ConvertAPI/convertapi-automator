@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Workflow editor</title>
     <link rel="stylesheet" href="../../assets/css/materialize.css">
@@ -10,74 +11,76 @@
 <body class="workflow-editor">
     <nav>
         <div class="nav-wrapper">
-          <div class="brand-logo center">
-            <img src="../../assets/icons/png/icon@2x.png" width="25"/>
-              Create new conversion flow
-          </a>
+            <div class="brand-logo center">
+                <img src="../../assets/icons/png/icon@2x.png" width="25" />
+                Create new conversion flow
+                </a>
+            </div>
         </div>
-      </nav>
+    </nav>
     <div class="container mt-1">
-        <form>
-            <div class="row">
-                <div class="col s12 m12 l12">
-                    <div class="file-field input-field">
-                        <div class="btn">
-                          <span>Browse</span>
-                          <input type="file">
-                        </div>
-                        <div class="file-path-wrapper">
-                          <input class="file-path validate" placeholder="Please select a working directory" type="text">
-                        </div>
-                      </div>
-                </div>
-            </div>
-            <div class="workflow-wrapper">
-                <div class="workflow-item section z-depth-1">
-                    <div class="row">
-                        <div class="col s12 m12 l12">
-                            <h5>Setup an action</h5>
-                        </div>
-                        <div class="input-field col s5 m5 l5">
-                            <select class="browser-default js-src-select">
-                                <option value="" disabled selected>Convert from</option>
-                              </select>
-                        </div>
-                        <div class="input-field col s2 m2 l2 center">
-                            <p class="mt-1">
-                                TO
-                            </p>
-                        </div>
-                        <div class="input-field col s5 m5 l5">
-                            <select class="browser-default js-dst-select">
-                                <option value="" disabled selected>Convert to</option>
-                              </select>
-                        </div>
-                        <div class="col s12 m12">
-                            <div class="parameter-group">
-                                <legend>Required parameters</legend>
-                                <div class="input-field mb-5">
-                                    <label class="active">Encrypt password:</label>
-                                    <input type="number" id="concurrency" value="10">
-                                    <span class="helper-text" data-error="wrong" data-success="right">Sets the password to open protected documents.</span>
-                                </div>
-                                <div class="input-field">
-                                    <label class="active">Decrypt password:</label>
-                                    <input type="number" id="concurrency" value="10">
-                                    <span class="helper-text" data-error="wrong" data-success="right">Sets the password to open protected documents.</span>
-                                </div>
-                            </div>
-                            <div class="mt-1">
-                                <button class="btn d-block m-auto">Show advanced parameters</button>
-                            </div>
-                        </div>
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="file-field input-field">
+                    <div class="btn">
+                        <span>Browse</span>
+                        <input type="file">
                     </div>
-                    <div class="connector"></div>
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" placeholder="Please select a working directory" type="text">
+                    </div>
                 </div>
             </div>
-            <div class="right-align mt-5">
-                <button class="waves-effect waves-light btn btn-primary" type="submit">Save</button>
-            </div>
-        </form>
+        </div>
+        <div class="workflow-wrapper">
+           
+        </div>
     </div>
+    <template id="workflow-template">
+        <div class="workflow-item section z-depth-1 js-workflow-item">
+            <form>
+                <div class="row">
+                    <div class="col s12 m12 l12">
+                        <h5 class="js-title">Select a conversion</h5>
+                    </div>
+                    <div class="input-field col s5 m5 l5">
+                        <select class="browser-default js-src-select">
+                            <option value="" disabled selected>Convert from</option>
+                        </select>
+                    </div>
+                    <div class="input-field col s2 m2 l2 center">
+                        <p class="mt-1">
+                            TO
+                        </p>
+                    </div>
+                    <div class="input-field col s5 m5 l5">
+                        <select class="browser-default js-dst-select">
+                            <option value="" disabled selected>Convert to</option>
+                        </select>
+                    </div>
+                    <div class="col s12 m12 js-parameter-wrapper hidden">
+                    </div>
+                    <div class="col s12 m12 l12 center-align">
+                        <a href="javascript:void(0)" class="btn mt-1 js-show-params hidden">Show parameters</a>
+                        <a href="javascript:void(0)" class="btn mt-1 js-save-changes hidden">Save changes</a>
+                    </div>
+                </div>
+            </form>
+            <div class="connector js-add-workflow-item"></div>
+        </div>
+    </template>
+    <template id="input-template">
+        <div class="input-field mb-5">
+            <label class="active"></label>
+            <input type="number" value="">
+            <span class="helper-text"></span>
+        </div>
+    </template>
+    <template id="parameter-group-template">
+        <div class="parameter-group">
+            <legend>Required parameters</legend>
+        </div>
+    </template>
 </body>
+
 </html>
