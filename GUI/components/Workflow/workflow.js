@@ -1,33 +1,69 @@
-const {ipcRenderer} = require('electron');
+const electron = require('electron');
+const { ipcRenderer } = electron;
 
-let workflowItems = [];
-// create new workflow
-addWorkflowItem();
+let finalDestination = null;
+let id = 0;
+let workflow = {
+    path: '',
+    flow: null
+}
+
+// select root path to initialize workflow
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelector('#rootPath').onclick = (e) => {
+        e.preventDefault();
+        ipcRenderer.invoke('folder:select').then((path) => {
+            workflow.path = path;
+            document.querySelector('#rootPathText').value = path;
+            // create new workflow
+            addWorkflowItem();
+            ipcRenderer.send('workflow:save', workflow);
+        });
+    }
+});
 
 function addWorkflowItem() {
-    let model = {
-        id: getWorkflowItemsCount(),
-        src: getWorkflowItemsCount() == 0 ? '' : workflowItems[workflowItems.length-1].dst,
-        dst: '',
-        directory: '',
-        parameters: [],
-        unsavedChanges: false
-    };
-    createWorkflowItem(model);
-    workflowItems.push(model);
-    console.log(workflowItems);
+    if(getWorkflowItemsCount() == 0 || finalDestination) {
+        let model = {
+            level: id++,
+            src: finalDestination,
+            dst: '',
+            parameters: [],
+            nextStep: null,
+        };
+        createWorkflowItem(model);
+        let flowItem = workflow.flow;
+        if(flowItem == null) {
+            workflow.flow = model;
+        } else {
+            while(flowItem != null) {
+                if(flowItem.nextStep == null) {
+                    flowItem.nextStep = model;
+                    break;
+                }
+                else
+                flowItem = flowItem.nextStep;
+            }
+        }
+    } else {
+        ipcRenderer.send('open-alert-dialog', {type: 'error', message: 'Please complete the previous step first!'});
+    }
 }
 
 function saveChanges(wrapper) {
     let id = wrapper.dataset.id;
-    workflowItems[id].src = wrapper.dataset.src;
-    workflowItems[id].dst = wrapper.dataset.dst;
+    let workflowItem = workflow.flow;
+    for(let i = 0; i < id; i++) {
+        workflowItem = workflowItem.nextStep;
+    }
+    workflowItem.src = wrapper.dataset.src;
+    workflowItem.dst = wrapper.dataset.dst;
+    finalDestination = wrapper.dataset.dst;
     setUnsavedChanges(wrapper, false);
+    ipcRenderer.send('workflow:save', workflow);
 }
 
 function setUnsavedChanges(wrapper, val) {
-    let id = wrapper.dataset.id;
-    workflowItems.find(x=>x.id == id).unsavedChanges = val;
     wrapper.querySelector('.js-save-changes').classList.toggle('hidden', !val)
 }
 
@@ -77,7 +113,7 @@ function destinationSelectInit(select) {
             const dst = e.target.value;
             wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
             getShowParamsBtn(wrapper).classList.remove('hidden');
-            setUnsavedChanges(wrapper, true);
+            saveChanges(wrapper);
         } else 
             getShowParamsBtn(wrapper).classList.add('hidden');
     }
@@ -111,6 +147,8 @@ function saveChangesBtnInit(btn) {
     btn.onclick = (e) => {
         e.preventDefault();
         const wrapper = e.target.closest('.js-workflow-item');
+        clearConverterHtml(wrapper);
+        wrapper.querySelector('.js-show-params').classList.remove('hidden');
         saveChanges(wrapper);
     }
 }
@@ -119,7 +157,7 @@ function createWorkflowItem(model) {
     const template = document.getElementById('workflow-template');
     const clone = template.content.cloneNode(true);
     let wrapper = clone.querySelector('.js-workflow-item');
-    wrapper.dataset.id = model.id;
+    wrapper.dataset.id = model.level;
     wrapper.dataset.src = model.src;
     const srcSelect = clone.querySelector('.js-src-select');
     if(model.src) {
@@ -196,3 +234,4 @@ function clearConverterHtml(wrapper) {
     wrapper.querySelector('.js-parameter-wrapper').classList.add('hidden');
     wrapper.querySelector('.js-parameter-wrapper').innerHTML = "";
 }
+

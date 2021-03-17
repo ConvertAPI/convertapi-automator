@@ -24,10 +24,10 @@
                 <div class="file-field input-field">
                     <div class="btn">
                         <span>Browse</span>
-                        <input type="file">
+                        <input type="file" id="rootPath" webkitdirectory onchange="setRootDir(event)">
                     </div>
                     <div class="file-path-wrapper">
-                        <input class="file-path validate" placeholder="Please select a working directory" type="text">
+                        <input class="file-path validate" id="rootPathText" placeholder="Please select a working directory" type="text">
                     </div>
                 </div>
             </div>
@@ -39,7 +39,7 @@
     <template id="workflow-template">
         <div class="workflow-item section z-depth-1 js-workflow-item">
             <form>
-                <div class="row">
+                <div class="row mb-0">
                     <div class="col s12 m12 l12">
                         <h5 class="js-title">Select a conversion</h5>
                     </div>
@@ -77,7 +77,7 @@
         </div>
     </template>
     <template id="parameter-group-template">
-        <div class="parameter-group">
+        <div class="parameter-group mb-2">
             <legend>Required parameters</legend>
         </div>
     </template>

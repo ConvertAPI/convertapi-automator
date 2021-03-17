@@ -57,7 +57,7 @@ class Main {
   }
 };
 
-ipcMain.on('open:folder', function(e, path) {
+ipcMain.on('folder:open', function(e, path) {
   shell.showItemInFolder(path);
 });
 
