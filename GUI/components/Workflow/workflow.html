@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="workflow-wrapper">
-           
+        
         </div>
     </div>
     <template id="workflow-template">
@@ -44,7 +44,7 @@
                         <h5 class="js-title">Select a conversion</h5>
                     </div>
                     <div class="input-field col s5 m5 l5">
-                        <select class="browser-default js-src-select">
+                        <select class="browser-default js-src-select" name="src">
                             <option value="" disabled selected>Convert from</option>
                         </select>
                     </div>
@@ -54,31 +54,66 @@
                         </p>
                     </div>
                     <div class="input-field col s5 m5 l5">
-                        <select class="browser-default js-dst-select">
+                        <select class="browser-default js-dst-select" name="dst">
                             <option value="" disabled selected>Convert to</option>
                         </select>
                     </div>
                     <div class="col s12 m12 js-parameter-wrapper hidden">
                     </div>
                     <div class="col s12 m12 l12 center-align">
-                        <a href="javascript:void(0)" class="btn mt-1 js-show-params hidden">Show parameters</a>
-                        <a href="javascript:void(0)" class="btn mt-1 js-save-changes hidden">Save changes</a>
+                        <a href="javascript:void(0)" class="btn mt-1 js-show-params hidden"><i class="material-icons left">edit</i>Edit parameters</a>
+                        <button type="submit" href="javascript:void(0)" class="btn mt-1 js-save-changes hidden"><i class="material-icons left">check</i>Save changes</button>
                     </div>
                 </div>
             </form>
             <div class="connector js-add-workflow-item"></div>
         </div>
     </template>
-    <template id="input-template">
-        <div class="input-field mb-5">
+    <template id="select-template">
+        <div class="input-field select">
             <label class="active"></label>
-            <input type="number" value="">
+            <select class="browser-default">
+            </select>
+            <span class="helper-text"></span>
+        </div>
+    </template>
+    <template id="checkbox-template">
+        <div class="input-field">
+            <label class="active"></label>
+            <div class="switch">
+                <label>
+                  No
+                  <input type="checkbox" value="true">
+                  <span class="lever"></span>
+                  Yes
+                </label>
+              </div>
+            <span class="helper-text"></span>
+        </div>
+    </template>
+    <template id="input-template">
+        <div class="input-field">
+            <label class="active"></label>
+            <input type="text" value="">
             <span class="helper-text"></span>
         </div>
     </template>
     <template id="parameter-group-template">
-        <div class="parameter-group mb-2">
+        <div class="parameter-group">
             <legend>Required parameters</legend>
+        </div>
+    </template>
+    <template id="file-input-template">
+        <div class="file-field input-field">
+            <label class="active"></label>
+            <div class="btn">
+                <span>Browse</span>
+                <input type="file">
+            </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" placeholder="Please select a file" type="text">
+            </div>
+            <span class="helper-text"></span>
         </div>
     </template>
 </body>

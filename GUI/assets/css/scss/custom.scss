@@ -136,9 +136,26 @@
         left: -20px;
         cursor:pointer;
     }
+    .workflow-item:not(:last-child) {
+        .connector {
+            pointer-events: none;
+            &:after {
+                content: "";
+                width: 17px;
+                height: 10px;
+                background-image: url(../img/chevron-down.png);
+                background-size: cover;
+                position: absolute;
+                bottom: -2px;
+                left: -8px;
+                cursor:default;
+                pointer-events: none;
+            }
+        }
+    } 
     .parameter-group {
         margin-top:20px;
-        // border-radius: 10px;
+        margin-bottom:20px;
         border: 1px solid rgb(217, 217, 217);
         padding: 20px 20px 20px;
         position:relative;
@@ -149,6 +166,18 @@
             background: white;
             padding: 0 5px;
             color:#7e7e7e;
+        }
+        .input-field {
+            &.file-field, &.select {
+                padding-top: 10px;
+            }
+            .switch {
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+            &:not(:last-child) {
+                margin-bottom:50px;
+            }
         }
     }
 }

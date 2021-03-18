@@ -43,14 +43,26 @@ class Config {
           this.ACTIVE = settings.active;
           this.SECRET = settings.secret;
           this.CONCURRENCY = settings.concurrency; 
+          this.storeToFile(settings);
+    }
 
-          var data = JSON.stringify(settings);
-            fs.writeFile(CONFIG_PATH, data, function (err) {
-                if (err) {
-                    console.log(err.message);
-                    return;
-                }
-            });
+    addWorkflowItem(path) {
+        let dataJson = fs.readFileSync(CONFIG_PATH);
+        let data = JSON.parse(dataJson);
+        if(!data.workflows)
+            data.workflows = [];
+        data.workflows.push({path: path});
+        this.storeToFile(data);
+    }
+
+    storeToFile(settings) {
+        var data = JSON.stringify(settings);
+        fs.writeFile(CONFIG_PATH, data, function (err) {
+            if (err) {
+                console.log(err.message);
+                return;
+            }
+        });
     }
 }
 
