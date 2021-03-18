@@ -13,5 +13,6 @@
 /Lib/obj
 /GUI/.vs
 /GUI/node_modules
+/GUI/release-builds
 WinConfig/bin
 WinConfig/obj
