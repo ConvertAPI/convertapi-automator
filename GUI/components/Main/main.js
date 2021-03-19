@@ -5,41 +5,45 @@ const path = require('path');
 
 document.querySelector('.js-open-settings').addEventListener('click', (e) => { ipcRenderer.send('settings:open'); });
 document.querySelector('.js-create-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:create'); });
-let workflows = document.querySelectorAll('.js-workflow');
-
-for(var i = 0; i < workflows.length; i++) {
-  workflows[i].querySelector('.js-open-folder').addEventListener('click', (e) => { ipcRenderer.send('folder:open', e.target.getAttribute('data-path')); });
-  workflows[i].querySelector('.js-select-files').addEventListener('click', (e) => { ipcRenderer.send('files:add'); });
-}
 
 ipcRenderer.on('update-workflows', (e, data) => {
   const template = document.getElementById('workflow-template');
   data.forEach(workflow => {
     if(workflow.path) {
-      let title = getWorkflowName(workflow.path, 'pdf'); // todo set src format here as an initial title parameter
-      console.log(title);
+      let model = {};
+      let conversions = [];
+      generateWorkflow(workflow.path, model, model.src); // todo set src format here as an initial title parameter
+      console.log(model);
+      getConversions(model.nextStep, conversions);
+      console.log(conversions);
       const clone = template.content.cloneNode(true);
-      clone.querySelector('.card-content p').textContent = title;
+      clone.querySelector('.card-content p').innerHTML = conversions.join(' &#8594; ');
+      clone.querySelector('.js-open-folder').addEventListener('click', (e) => { ipcRenderer.send('folder:open', path.join(workflow.path, ...conversions));});
+      clone.querySelector('.js-select-files').addEventListener('click', (e) => { ipcRenderer.send('files:add', workflow.path); });
       document.querySelector('.js-workflow-wrapper').appendChild(clone);
     }
   });
 });
 
-function getWorkflowName(rootDir, title = '') {
-  let folderFound = false;
-  let nextPath = '';
-  let files = fs.readdirSync(rootDir);
-  files.forEach((file, idx) => {
-    let childPath = path.join(rootDir, file);
+function generateWorkflow(dir, obj, src) {
+  let files = fs.readdirSync(dir);
+  files.forEach((file) => {
+    let childPath = path.join(dir, file);
     if(fs.lstatSync(childPath).isDirectory()) {
-      nextPath = childPath;
-      folderFound = true;
-      title += ` → ${file}`;
+      obj.nextStep = {
+        src: src,
+        dst: file,
+        path: childPath,
+        parameters: [],
+        nextStep: null
+      }
+      generateWorkflow(childPath, obj.nextStep, file);
     }
   });
-  if(!folderFound) {
-    return title;
-  } else {
-    return getWorkflowName(nextPath, title);
-  }
+}
+
+function getConversions(workflow, arr) {
+  arr.push(workflow.dst);
+  if(workflow.nextStep)
+    getConversions(workflow.nextStep, arr);
 }

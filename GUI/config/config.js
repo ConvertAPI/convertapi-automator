@@ -51,6 +51,7 @@ class Config {
     }
 
     addWorkflowItem(path) {
+        console.log('CONFIG: Add workflow item')
         let dataJson = fs.readFileSync(CONFIG_PATH);
         let data = JSON.parse(dataJson);
         if(!data.workflows)
@@ -61,6 +62,8 @@ class Config {
     }
 
     storeToFile(settings) {
+        console.log('store config data')
+        console.log(settings)
         var data = JSON.stringify(settings);
         fs.writeFile(CONFIG_PATH, data, function (err) {
             if (err) {

@@ -110,7 +110,6 @@ ipcMain.on('workflow:create', function () {
 });
 
 ipcMain.on('workflow:save', function (e, data) {
-  console.log(data)
   config.addWorkflowItem(data.path);
   if (!fs.existsSync(data.path)) {
     fs.mkdir(data.path, (err) => {

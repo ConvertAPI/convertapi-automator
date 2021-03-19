@@ -65,19 +65,19 @@ class Main {
   }
 };
 
-ipcMain.on('folder:open', function(e, path) {
-  shell.showItemInFolder(path);
+ipcMain.on('folder:open', function(e, dirPath) {
+  shell.showItemInFolder(dirPath);
 });
 
 // Catch files:add
-ipcMain.on('files:add', function() {
+ipcMain.on('files:add', function(e, dirPath) {
   // open file select dialog
   dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
   .then(result => {
     if(!result.canceled) {
       for(let i = 0; i < result.filePaths.length; i++) {
         // File destination.txt will be created or overwritten by default.
-        fs.copyFile(result.filePaths[0], "C:\\Documents\\" + result.filePaths[0].replace(/^.*[\\\/]/, ''), (err) => {
+        fs.copyFile(result.filePaths[0], path.join(dirPath, result.filePaths[0].replace(/^.*[\\\/]/, '')), (err) => {
           if (err) throw err;
         });
       }
