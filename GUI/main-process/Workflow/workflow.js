@@ -73,11 +73,9 @@ function saveConfig(dir, parameters) {
   for(let elem in parameters) {
     fileContent += `${elem}=${parameters[elem]}\n`;
   }
-  console.log(fileContent);
   if(fileContent.length) {
     fs.writeFile(path.join(dir, 'config.txt'), fileContent, function (err) {
       if (err) throw err;
-      console.log('Saved!');
     });
   }
 }

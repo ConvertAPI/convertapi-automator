@@ -14,13 +14,16 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelector('#rootPath').onclick = (e) => {
         e.preventDefault();
         ipcRenderer.invoke('folder:select').then((path) => {
-            workflow.path = path;
-            document.querySelector('#rootPathText').value = path;
-            // create new workflow
-            if(!workflow.flow)
-                addWorkflowItem();
-            ipcRenderer.send('workflow:save', workflow);
+            if(path) {
+                workflow.path = path;
+                document.querySelector('#rootPathText').value = path;
+                // create new workflow
+                if(!workflow.flow)
+                    addWorkflowItem();
+                ipcRenderer.send('workflow:save', workflow);
+            }
         });
+        
     }
 });
 

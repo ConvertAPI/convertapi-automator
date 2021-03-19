@@ -42,10 +42,18 @@ class Main {
       automator.kill();
       app.quit();
     });
+
+    this.window.webContents.once('dom-ready', () => {
+      this.updateWorkflows();
+    });
   }
 
   setOpacity(value) {
     this.window.setOpacity(value);
+  }
+
+  updateWorkflows() {
+    this.window.webContents.send('update-workflows', config.getWorkflows());      
   }
 
   getWindow() {

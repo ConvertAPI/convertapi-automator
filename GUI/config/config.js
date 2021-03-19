@@ -12,6 +12,7 @@ class Config {
     SECRET = '';
     ACTIVE = true;
     CONCURRENCY = 10;
+    workflows = [];
 
     constructor() {
         this.loadSettings();
@@ -24,6 +25,7 @@ class Config {
             this.SECRET = settings.secret;
             this.ACTIVE = settings.active;
             this.CONCURRENCY = settings.concurrency;
+            this.workflows = settings.workflows;
           }
           catch (err) {
             console.log(err);
@@ -37,13 +39,15 @@ class Config {
             active: typeof(active) == undefined ? this.ACTIVE : active,
             concurrency: concurrency || this.CONCURRENCY
           };
-          console.log('saving settings');
-          console.log(settings);
           // set global settings
           this.ACTIVE = settings.active;
           this.SECRET = settings.secret;
           this.CONCURRENCY = settings.concurrency; 
           this.storeToFile(settings);
+    }
+
+    getWorkflows() {
+        return this.workflows;
     }
 
     addWorkflowItem(path) {
@@ -52,6 +56,7 @@ class Config {
         if(!data.workflows)
             data.workflows = [];
         data.workflows.push({path: path});
+        this.workflows = data.workflows;
         this.storeToFile(data);
     }
 

@@ -20,31 +20,33 @@
     </ul>
   </nav>
   <div class="container">
-    <div class="row">
-      <!--Workflow card - make dynamic -->
-      <div class="col s12 m12 l6 xl4">
-        <div class="card workflow js-workflow">
-          <div class="card-image js-select-files">
-            <i class="material-icons center medium">cloud_upload</i>
-            <small>
-              Drag and drop file here
-            </small>
-            <small>or</small>
-            <a class="waves-effect waves-light btn orange" href="#">Browse for file</a>
-          </div>
-          <div class="card-content">
-            <p>DOCX → PDF → Compress → Encrypt</p>
-          </div>
-          <div class="card-action">
-            <a data-path="C:\Documents\split\" class="js-open-folder waves-effect waves-light btn" href="#" title="Show results in folder"><i class="material-icons tiny center">folder_open</i></a>
-            <a class="waves-effect waves-light btn" href="#" title="Edit workflow"><i class="material-icons tiny center">create</i></a>
-            <a class="waves-effect waves-light btn" href="#" title="Delete workflow"><i class="material-icons tiny center">delete</i></a>
-          </div>
-        </div>
-      </div>
-      <!-- ENDOF Workflow card -->
+    <div class="row js-workflow-wrapper">
     </div>
     <a class="btn-floating btn-large waves-effect waves-light right js-create-workflow" title="Create new workflow"><i class="material-icons">add</i></a>
   </div>
+
+  <template id="workflow-template">
+    <div class="col s12 m12 l6 xl4">
+      <div class="card workflow js-workflow">
+        <div class="card-image js-select-files">
+          <i class="material-icons center medium">cloud_upload</i>
+          <small>
+            Drag and drop file here
+          </small>
+          <small>or</small>
+          <a class="waves-effect waves-light btn orange" href="#">Browse for file</a>
+        </div>
+        <div class="card-content">
+          <p>DOCX → PDF → Compress → Encrypt</p>
+        </div>
+        <div class="card-action">
+          <a data-id="" class="js-open-folder waves-effect waves-light btn" href="#" title="Show results in folder"><i class="material-icons tiny center">folder_open</i></a>
+          <a data-id="" class="waves-effect waves-light btn" href="#" title="Edit workflow"><i class="material-icons tiny center">create</i></a>
+          <a data-id="" class="waves-effect waves-light btn" href="#" title="Delete workflow"><i class="material-icons tiny center">delete</i></a>
+        </div>
+      </div>
+    </div>
+  </template>
+
 </body>
 </html>
