@@ -1,4 +1,4 @@
-const { BrowserWindow, ipcMain, dialog } = require('electron');
+const { BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
@@ -120,6 +120,7 @@ ipcMain.on('workflow:save', function (e, data) {
     });
   } else
     saveWorkflowItem(data.flow, data.path);
+    e.sender.send('workflow:save:done');
 });
 
 module.exports = workflow;

@@ -20,16 +20,18 @@ class Config {
 
     loadSettings() {
         let data = fs.readFileSync(CONFIG_PATH);
-        try {
-            let settings = JSON.parse(data);
-            this.SECRET = settings.secret;
-            this.ACTIVE = settings.active;
-            this.CONCURRENCY = settings.concurrency;
-            this.workflows = settings.workflows;
-          }
-          catch (err) {
-            console.log(err);
-          }
+        if(data.toString()) {
+            try {
+                let settings = JSON.parse(data);
+                this.SECRET = settings.secret;
+                this.ACTIVE = settings.active;
+                this.CONCURRENCY = settings.concurrency;
+                this.workflows = settings.workflows;
+              }
+              catch (err) {
+                console.log(err);
+              }
+        }
     }
 
     saveSettings(secret, active, concurrency) {
@@ -51,27 +53,38 @@ class Config {
     }
 
     addWorkflowItem(path) {
-        console.log('CONFIG: Add workflow item')
+        let dataJson = fs.readFileSync(CONFIG_PATH);
+        if(dataJson) {
+            let data = JSON.parse(dataJson);
+            if(!data.workflows)
+                data.workflows = [];
+            else if(!data.workflows.find(x=>x.path.localeCompare(path) == 0)) {
+                data.workflows.push({path: path});
+                this.workflows = data.workflows;
+                this.storeToFile(data);
+            }
+        }
+    }
+
+    deleteWorkflowItem(path) {
         let dataJson = fs.readFileSync(CONFIG_PATH);
         let data = JSON.parse(dataJson);
-        if(!data.workflows)
-            data.workflows = [];
-        data.workflows.push({path: path});
-        this.workflows = data.workflows;
-        this.storeToFile(data);
+        if(data.workflows && data.workflows.find(x=> x.path.localeCompare(path) == 0)) {
+            data.workflows = data.workflows.filter(x=> x.path.localeCompare(path) == -1);
+            this.workflows = data.workflows;
+            this.storeToFile(data);
+        }
     }
 
     storeToFile(settings) {
-        console.log('store config data')
-        console.log(settings)
-        var data = JSON.stringify(settings);
-        fs.writeFile(CONFIG_PATH, data, function (err) {
-            if (err) {
-                console.log(err.message);
-                return;
-            }
-        });
+            var data = JSON.stringify(settings);
+            fs.writeFile(CONFIG_PATH, data, function (err) {
+                if (err) {
+                    console.log(err.message);
+                    return;
+                }
+            });
+        }
     }
-}
 
 module.exports = new Config();

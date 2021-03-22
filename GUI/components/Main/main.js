@@ -7,20 +7,21 @@ document.querySelector('.js-open-settings').addEventListener('click', (e) => { i
 document.querySelector('.js-create-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:create'); });
 
 ipcRenderer.on('update-workflows', (e, data) => {
+  let wrapper = document.querySelector('.js-workflow-wrapper');
+  wrapper.innerHTML = "";
   const template = document.getElementById('workflow-template');
   data.forEach(workflow => {
     if(workflow.path) {
       let model = {};
       let conversions = [];
       generateWorkflow(workflow.path, model, model.src); // todo set src format here as an initial title parameter
-      console.log(model);
       getConversions(model.nextStep, conversions);
-      console.log(conversions);
       const clone = template.content.cloneNode(true);
-      clone.querySelector('.card-content p').innerHTML = conversions.join(' &#8594; ');
+      clone.querySelector('.card-content p').innerHTML = conversions.length ? conversions.join(' &#8594; ') : 'Please complete the set up';
       clone.querySelector('.js-open-folder').addEventListener('click', (e) => { ipcRenderer.send('folder:open', path.join(workflow.path, ...conversions));});
       clone.querySelector('.js-select-files').addEventListener('click', (e) => { ipcRenderer.send('files:add', workflow.path); });
-      document.querySelector('.js-workflow-wrapper').appendChild(clone);
+      clone.querySelector('.js-delete-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:delete', workflow.path); });
+      wrapper.appendChild(clone);
     }
   });
 });
@@ -43,7 +44,9 @@ function generateWorkflow(dir, obj, src) {
 }
 
 function getConversions(workflow, arr) {
-  arr.push(workflow.dst);
-  if(workflow.nextStep)
-    getConversions(workflow.nextStep, arr);
+  if(workflow && workflow.dst) {
+    arr.push(workflow.dst);
+    if(workflow.nextStep)
+      getConversions(workflow.nextStep, arr);
+  }
 }

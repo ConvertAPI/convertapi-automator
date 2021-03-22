@@ -13,18 +13,26 @@ let workflow = {
 document.addEventListener("DOMContentLoaded", function() {
     document.querySelector('#rootPath').onclick = (e) => {
         e.preventDefault();
-        ipcRenderer.invoke('folder:select').then((path) => {
-            if(path) {
-                workflow.path = path;
-                document.querySelector('#rootPathText').value = path;
-                // create new workflow
-                if(!workflow.flow)
-                    addWorkflowItem();
-                ipcRenderer.send('workflow:save', workflow);
-            }
-        });
-        
+        if(!workflow.path) {
+            ipcRenderer.invoke('folder:select').then((path) => {
+                if(path) {
+                    workflow.path = path;
+                    document.querySelector('#rootPathText').value = path;
+                    // create new workflow
+                    if(!workflow.flow)
+                        addWorkflowItem();
+                    ipcRenderer.send('workflow:save', workflow);
+                }
+            });
+        }
+        else {
+            ipcRenderer.send('folder:open', workflow.path);
+        }
     }
+});
+
+ipcRenderer.on('workflow:save:done', function() {
+    ipcRenderer.send('workflows:update');
 });
 
 function addWorkflowItem() {

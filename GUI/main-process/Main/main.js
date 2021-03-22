@@ -46,6 +46,30 @@ class Main {
     this.window.webContents.once('dom-ready', () => {
       this.updateWorkflows();
     });
+
+    // handle evets
+    let _this = this;
+    ipcMain.on('workflows:update', function() {
+      _this.updateWorkflows();
+    });
+
+    ipcMain.on('workflow:delete', function(e, dirPath) {
+      let options = {
+        buttons: ["Yes","No"],
+        message: "Do you really want to delete this workflow?"
+      };
+      dialog.showMessageBox(_this.window, options).then(result => {
+        if(result.response === 0) {
+          _this.deleteWorkflow(dirPath);
+        }
+      });
+    });
+  }
+
+  deleteWorkflow(dirPath) {
+    config.deleteWorkflowItem(dirPath);
+    fs.rmdirSync(dirPath, { recursive: true });
+    this.updateWorkflows();
   }
 
   setOpacity(value) {
@@ -69,7 +93,6 @@ ipcMain.on('folder:open', function(e, dirPath) {
   shell.showItemInFolder(dirPath);
 });
 
-// Catch files:add
 ipcMain.on('files:add', function(e, dirPath) {
   // open file select dialog
   dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
