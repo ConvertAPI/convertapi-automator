@@ -66,11 +66,12 @@ class Config {
         }
     }
 
-    deleteWorkflowItem(path) {
+    deleteWorkflowItem(rootDir) {
         let dataJson = fs.readFileSync(CONFIG_PATH);
         let data = JSON.parse(dataJson);
-        if(data.workflows && data.workflows.find(x=> x.path.localeCompare(path) == 0)) {
-            data.workflows = data.workflows.filter(x=> x.path.localeCompare(path) == -1);
+        if(data.workflows && data.workflows.find(x=> x.path.localeCompare(rootDir) == 0).length > 0) {
+            let todelete = data.workflows.splice(data.workflows.indexOf(x=> x.path.localeCompare(rootDir) == 0),1)
+            console.log(todelete);
             this.workflows = data.workflows;
             this.storeToFile(data);
         }

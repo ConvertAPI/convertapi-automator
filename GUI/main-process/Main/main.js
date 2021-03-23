@@ -77,7 +77,7 @@ class Main {
   }
 
   updateWorkflows() {
-    this.window.webContents.send('update-workflows', config.getWorkflows());      
+    this.window.webContents.send('update-workflows', config.getWorkflows());
   }
 
   getWindow() {

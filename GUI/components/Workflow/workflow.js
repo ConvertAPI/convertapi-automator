@@ -3,11 +3,25 @@ const path = require('path');
 const { ipcRenderer } = electron;
 
 let finalDestination = null;
-let id = 0;
+let totalLevels = 0;
 let workflow = {
     path: '',
-    flow: null
+    nextStep: null
 }
+
+ipcRenderer.on('set-workflow', (e, data) => {
+    console.log(data);
+    workflow.path = data.path;
+    workflow.nextStep = data.nextStep;
+    document.querySelector('#rootPathText').value = workflow.path;
+    document.querySelector('#rootPath').filename = workflow.path;
+    let flow = workflow.nextStep;
+    while(flow) {
+        createWorkflowItem(flow);
+        finalDestination = flow.dst;
+        flow = flow.nextStep;
+    }
+});
 
 // select root path to initialize workflow
 document.addEventListener("DOMContentLoaded", function() {
@@ -19,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     workflow.path = path;
                     document.querySelector('#rootPathText').value = path;
                     // create new workflow
-                    if(!workflow.flow)
+                    if(!workflow.nextStep)
                         addWorkflowItem();
                     ipcRenderer.send('workflow:save', workflow);
                 }
@@ -38,7 +52,6 @@ ipcRenderer.on('workflow:save:done', function() {
 function addWorkflowItem() {
     if(getWorkflowItemsCount() == 0 || finalDestination) {
         let model = {
-            level: id++,
             src: finalDestination,
             dst: '',
             parameters: [],
@@ -46,9 +59,9 @@ function addWorkflowItem() {
         };
         finalDestination = null;
         createWorkflowItem(model);
-        let flowItem = workflow.flow;
+        let flowItem = workflow.nextStep;
         if(flowItem == null) {
-            workflow.flow = model;
+            workflow.nextStep = model;
         } else {
             while(flowItem != null) {
                 if(flowItem.nextStep == null) {
@@ -66,7 +79,7 @@ function addWorkflowItem() {
 
 function saveChanges(wrapper, data) {
     let id = wrapper.dataset.id;
-    let workflowItem = workflow.flow;
+    let workflowItem = workflow.nextStep;
     for(let i = 0; i < id; i++) {
         workflowItem = workflowItem.nextStep;
     }
@@ -130,19 +143,22 @@ function destinationSelectInit(select) {
             const dst = e.target.value;
             wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
             getShowParamsBtn(wrapper).classList.remove('hidden');
-            saveChanges(wrapper, null);
+            let formData = { src: src, dst: dst};
+            saveChanges(wrapper, formData);
         } else 
             getShowParamsBtn(wrapper).classList.add('hidden');
     }
 }
 
-function populateDestinationFormats(src, wrapper) {
+function populateDestinationFormats(src, wrapper, dst) {
     ipcRenderer.invoke('get-destination-formats', src).then((formats) => {
         for(let i = 0; i < formats.length; i++) {
             let format = formats[i];
             let el = document.createElement("option");
             el.textContent = format;
             el.value = format;
+            if(dst && dst == formats[i])
+                el.selected = true;
             getDestinationSelect(wrapper).appendChild(el);
         }
     });
@@ -169,8 +185,12 @@ function formInit(form) {
         for (let i = 0, element; element = elements[i++];) {
             if (!element.checkValidity())
                 isValid = false;
-            else if(element.value && element.name != 'src' && element.name != 'dst')
-                formData[element.name] = element.value;
+            else if(element.value) { // && element.name != 'src' && element.name != 'dst'
+                if(element.type == 'checkbox')
+                    formData[element.name] = element.checked;
+                else
+                    formData[element.name] = element.value;
+            }
         }
         if(isValid) {
             const wrapper = e.target.closest('.js-workflow-item');
@@ -187,8 +207,13 @@ function createWorkflowItem(model) {
     const template = document.getElementById('workflow-template');
     const clone = template.content.cloneNode(true);
     let wrapper = clone.querySelector('.js-workflow-item');
-    wrapper.dataset.id = model.level;
+    wrapper.dataset.id = totalLevels;
+    totalLevels++;
     wrapper.dataset.src = model.src;
+    if(model.dst) {
+        wrapper.dataset.dst = model.dst;
+        getShowParamsBtn(wrapper).classList.remove('hidden');
+    }
     const srcSelect = clone.querySelector('.js-src-select');
     if(model.src) {
         srcSelect.innerHTML = "";
@@ -197,7 +222,7 @@ function createWorkflowItem(model) {
         el.value = model.src;
         srcSelect.appendChild(el);
         srcSelect.value = model.src;
-        populateDestinationFormats(model.src, wrapper);
+        populateDestinationFormats(model.src, wrapper, model.dst);
     } else {
         ipcRenderer.invoke('get-source-formats').then((formats) => {
             for(let i = 0; i < formats.length; i++) {
@@ -219,8 +244,18 @@ function createWorkflowItem(model) {
     document.querySelector('.workflow-wrapper').append(clone);
 }
 
+function getParametersByLevel(level) {
+    let flow = workflow.nextStep;
+    for(let i = 0; i < level; i++) {
+        flow = flow.nextStep;
+    }
+    return flow.parameters;
+}
+
 function showConverterParameters(wrapper, src, dst) {
     let format = { src: src, dst: dst };
+    let level = wrapper.dataset.id;
+    let parameters = getParametersByLevel(level);
     ipcRenderer.invoke('get-converter', format).then((converter) => {
         const groupTemplate = document.getElementById('parameter-group-template');
         const inputTemplate = document.getElementById('input-template');
@@ -245,30 +280,47 @@ function showConverterParameters(wrapper, src, dst) {
                         option.textContent = param.Values[property];
                         option.value = property;
                         select.appendChild(option);
-                        select.value = param.Default;
+                        if(parameters && parameters[param.Name])
+                            select.value = parameters[param.Name];
+                        else
+                            select.value = param.Default;
                     }
-                } else if(inputType == 'checkbox') {
+                } else if(inputType.localeCompare('checkbox') == 0) {
                     input = checkboxTemplate.content.cloneNode(true);
-                    input.querySelector('input').setAttribute('name', param.Name);
-                    if(param.Default)
-                        input.querySelector('input').setAttribute('checked', 'checked');
-                } else if(inputType == 'file') {
+                    let inputField = input.querySelector('input');
+                    inputField.setAttribute('name', param.Name);
+                    if(parameters && parameters[param.Name] !== undefined) {
+                        if(parameters[param.Name].localeCompare('true') == 0)
+                            inputField.setAttribute('checked', 'checked');
+                    }
+                    else if(param.Default)
+                        inputField.setAttribute('checked', 'checked');
+                } else if(inputType.localeCompare('file') == 0) {
                     input = fileTemplate.content.cloneNode(true);
-                    input.querySelector('input[type=file]').setAttribute('name', param.Name);
+                    let inputField = input.querySelector('input[type=file]');
+                    inputField.setAttribute('name', param.Name);
                     if(param.Required)
-                        input.querySelector('input[type=file]').setAttribute('required', 'required');
-                    input.querySelector('input[type=file]').onchange = (e) => {
+                        inputField.setAttribute('required', 'required');
+                    if(parameters && parameters[param.Name])
+                        inputField.value = parameters[param.Name];
+                    inputField.onchange = (e) => {
                         e.target.closest('.file-field').querySelector('.file-path').value = e.target.value;
                     }
                 } else {
                     input = inputTemplate.content.cloneNode(true);
-                    input.querySelector('input').setAttribute('type', inputType);
-                    input.querySelector('input').setAttribute('name', param.Name);
+                    let inputField = input.querySelector('input');
+                    inputField.setAttribute('type', inputType);
+                    inputField.setAttribute('name', param.Name);
+                    if(parameters && parameters[param.Name])
+                        inputField.value = parameters[param.Name];
                     if(param.Default)
-                        input.querySelector('input').setAttribute('placeholder', param.Default);
-                    if(param.Required)
-                        input.querySelector('input').setAttribute('required', 'required');
+                        inputField.setAttribute('placeholder', param.Default);
+                    if(param.Required) {
+                        input.querySelector('.input-field').classList.add('required');
+                        inputField.setAttribute('required', 'required');
+                    }
                 }
+
                 input.querySelector('label').innerHTML = param.Label + (param.Required ? '<strong>*</strong>' : '');
                 input.querySelector('.helper-text').textContent = param.Description;
                 clone.querySelector('.parameter-group').appendChild(input);

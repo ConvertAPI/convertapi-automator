@@ -21,7 +21,7 @@ function openAlertDialog(data) {
   dialog.showMessageBox(options);
 }
 
-function createWindow() {
+function createWindow(workflowPath) {
   workflow.window = new BrowserWindow({
     icon: config.ICON_PATH,
     width: 1280,
@@ -45,6 +45,46 @@ function createWindow() {
   workflow.window.on('close', function () {
     workflow.window = null;
   });
+  if(workflowPath) {
+    let workflowData = { path: workflowPath };
+    generateWorkflow(workflowPath, workflowData, null);
+    workflow.window.webContents.send('set-workflow', workflowData);
+  }
+}
+
+function generateWorkflow(dir, obj, src) {
+  let files = fs.readdirSync(dir);
+  files.forEach((file) => {
+    let childPath = path.join(dir, file);
+    // check if next step exists
+    if (fs.lstatSync(childPath).isDirectory()) {
+      let parameters = [];
+      // read parameters from config.txt
+      let configPath = path.join(childPath, 'config.txt');
+      if (fs.existsSync(configPath)) {
+        let parametersString = fs.readFileSync(configPath).toString();
+        if (parametersString) {
+          var stringArray = parametersString.split(/\r?\n/);
+          for (let i = 0; i < stringArray.length; i++) {
+            let kvp = stringArray[i].split('=');
+            if (kvp[1]) {
+              parameters[kvp[0]] = kvp[1];
+              if (!src && kvp[0] == 'src')
+                src = kvp[1];
+            }
+          }
+        }
+      }
+      obj.nextStep = {
+        src: src,
+        dst: file,
+        path: childPath,
+        parameters: parameters,
+        nextStep: null
+      }
+      generateWorkflow(childPath, obj.nextStep, file);
+    }
+  });
 }
 
 function saveWorkflowItem(flow, parentPath) {
@@ -57,23 +97,23 @@ function saveWorkflowItem(flow, parentPath) {
         else {
           if (flow.parameters.length)
             saveConfig(currentPath, flow.parameters);
-            saveWorkflowItem(flow.nextStep, currentPath);
-        } 
+          saveWorkflowItem(flow.nextStep, currentPath);
+        }
       });
     } else {
       if (flow.parameters)
         saveConfig(currentPath, flow.parameters);
-        saveWorkflowItem(flow.nextStep, currentPath);
+      saveWorkflowItem(flow.nextStep, currentPath);
     }
   }
 }
 
 function saveConfig(dir, parameters) {
   let fileContent = '';
-  for(let elem in parameters) {
+  for (let elem in parameters) {
     fileContent += `${elem}=${parameters[elem]}\n`;
   }
-  if(fileContent.length) {
+  if (fileContent.length) {
     fs.writeFile(path.join(dir, 'config.txt'), fileContent, function (err) {
       if (err) throw err;
     });
@@ -109,6 +149,10 @@ ipcMain.on('workflow:create', function () {
   createWindow();
 });
 
+ipcMain.on('workflow:edit', function (e, data) {
+  createWindow(data);
+});
+
 ipcMain.on('workflow:save', function (e, data) {
   config.addWorkflowItem(data.path);
   if (!fs.existsSync(data.path)) {
@@ -116,11 +160,11 @@ ipcMain.on('workflow:save', function (e, data) {
       if (err)
         console.log(err);
       else
-        saveWorkflowItem(data.flow, data.path);
+        saveWorkflowItem(data.nextStep, data.path);
     });
   } else
-    saveWorkflowItem(data.flow, data.path);
-    e.sender.send('workflow:save:done');
+    saveWorkflowItem(data.nextStep, data.path);
+  e.sender.send('workflow:save:done');
 });
 
 module.exports = workflow;
