@@ -1,27 +1,31 @@
 const electron = require('electron');
-const path = require('path');
+const querystring = require('querystring');
 const { ipcRenderer } = electron;
 
 let finalDestination = null;
 let totalLevels = 0;
 let workflow = {
     path: '',
+    src: '',
     nextStep: null
 }
 
-ipcRenderer.on('set-workflow', (e, data) => {
-    console.log(data);
-    workflow.path = data.path;
-    workflow.nextStep = data.nextStep;
-    document.querySelector('#rootPathText').value = workflow.path;
-    document.querySelector('#rootPath').filename = workflow.path;
-    let flow = workflow.nextStep;
-    while(flow) {
-        createWorkflowItem(flow);
-        finalDestination = flow.dst;
-        flow = flow.nextStep;
-    }
-});
+let query = querystring.parse(global.location.search);
+if(query['?rootDir'] && query['src']) {
+    ipcRenderer.invoke('get-workflow', { "rootDir": query['?rootDir'], "src": query['src']}).then((data) => {
+        workflow.path = data.path;
+        workflow.nextStep = data.nextStep;
+        document.querySelector('#rootPathText').value = workflow.path;
+        document.querySelector('#rootPath').filename = workflow.path;
+        let flow = workflow.nextStep;
+        while(flow) {
+            createWorkflowItem(flow);
+            finalDestination = flow.dst;
+            flow = flow.nextStep;
+        }
+    });
+}
+
 
 // select root path to initialize workflow
 document.addEventListener("DOMContentLoaded", function() {
@@ -87,7 +91,9 @@ function saveChanges(wrapper, data) {
     workflowItem.dst = wrapper.dataset.dst;
     if(data)
         workflowItem.parameters = data;
-
+    // set initial workflow step format
+    if(wrapper.dataset.id == 0)
+        workflow.src = wrapper.dataset.src;
     finalDestination = wrapper.dataset.dst;
     setUnsavedChanges(wrapper, false);
     ipcRenderer.send('workflow:save', workflow);
@@ -143,8 +149,7 @@ function destinationSelectInit(select) {
             const dst = e.target.value;
             wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
             getShowParamsBtn(wrapper).classList.remove('hidden');
-            let formData = { src: src, dst: dst};
-            saveChanges(wrapper, formData);
+            saveChanges(wrapper);
         } else 
             getShowParamsBtn(wrapper).classList.add('hidden');
     }
@@ -157,8 +162,10 @@ function populateDestinationFormats(src, wrapper, dst) {
             let el = document.createElement("option");
             el.textContent = format;
             el.value = format;
-            if(dst && dst == formats[i])
+            if(dst && dst == formats[i]) {
+                wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
                 el.selected = true;
+            }
             getDestinationSelect(wrapper).appendChild(el);
         }
     });
@@ -185,7 +192,7 @@ function formInit(form) {
         for (let i = 0, element; element = elements[i++];) {
             if (!element.checkValidity())
                 isValid = false;
-            else if(element.value) { // && element.name != 'src' && element.name != 'dst'
+            else if(element.value && element.name != 'src' && element.name != 'dst') {
                 if(element.type == 'checkbox')
                     formData[element.name] = element.checked;
                 else

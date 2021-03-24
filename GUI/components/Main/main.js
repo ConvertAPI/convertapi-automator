@@ -15,14 +15,14 @@ ipcRenderer.on('update-workflows', (e, data) => {
   data.forEach(workflow => {
     if(workflow.path) {
       let model = {};
-      let conversions = [];
-      generateWorkflow(workflow.path, model, workflow.src); // todo set src format here as an initial title parameter
+      let conversions = [ ];
+      generateWorkflow(workflow.path, model, workflow.src);
       getConversions(model.nextStep, conversions);
       const clone = template.content.cloneNode(true);
-      clone.querySelector('.card-content p').innerHTML = conversions.length ? conversions.join(' &#8594; ') : 'Please complete the set up';
-      clone.querySelector('.js-open-folder').addEventListener('click', (e) => { ipcRenderer.send('folder:open', path.join(workflow.path, ...conversions));});
+      clone.querySelector('.card-content p').innerHTML = conversions.length > 0 ? workflow.src + ' &#8594; ' + conversions.join(' &#8594; ') : 'Please complete the set up';
+      clone.querySelector('.js-open-folder').addEventListener('click', (e) => { ipcRenderer.send('folder:open', path.join(workflow.path, ...conversions))});
       clone.querySelector('.js-select-files').addEventListener('click', (e) => { ipcRenderer.send('files:add', workflow.path); });
-      clone.querySelector('.js-edit-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:edit', workflow.path); });
+      clone.querySelector('.js-edit-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:edit', {"rootDir": workflow.path, "src": workflow.src})});
       clone.querySelector('.js-delete-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:delete', workflow.path); });
       wrapper.appendChild(clone);
     }

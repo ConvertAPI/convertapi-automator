@@ -31,11 +31,11 @@ class Main {
     }));
 
     // open sign in if secret not provided
-    if(!config.SECRET) {
+    if(!config.SECRET)
       this.showLogin();
-    } else if(config.ACTIVE) {
+    else 
       automator.run();
-    }
+    
   
     // Quit app when closed
     this.window.on('closed', function() {

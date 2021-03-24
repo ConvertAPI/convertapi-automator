@@ -7,13 +7,23 @@ class Automator {
     }
 
     run() {
-        if(!this.automatorProcess || this.automatorProcess.killed) {
+        if(config.ACTIVE && (!this.automatorProcess || this.automatorProcess.killed)) {
             console.log('AUTOMATOR start')
             // run exe file with params
-            let directories = "C:\\Documents\\";
-            var parameters = ["--watch", `--secret=${config.SECRET}`, `--concurrency=${config.CONCURRENCY}`, `--dir=${directories}`];
+            let directories = '';
+            config.getWorkflows().map(x=>x.path).forEach(dir => {
+                directories += `--dir="${dir}" `
+            })
+            var parameters = ["--watch", `--secret=${config.SECRET}`, `--concurrency=${config.CONCURRENCY}`, directories];
             this.automatorProcess = child(config.AUTOMATOR_PATH, parameters, {shell: true}, function(err, data) {
                 console.log(err)
+                console.log(data.toString());
+            });
+
+            // this.automatorProcess.stdout.on('data', (data) => {
+            //     console.log(data.toString());
+            // });
+            this.automatorProcess.stderr.on('data', (data) => {
                 console.log(data.toString());
             });
         }
@@ -24,6 +34,11 @@ class Automator {
             console.log('AUTOMATOR kill')
             this.automatorProcess.kill();
         }
+    }
+
+    restart() {
+        this.kill();
+        this.run();
     }
 }
 module.exports = new Automator();

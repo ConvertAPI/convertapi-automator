@@ -3,13 +3,14 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const config = require('../../config/config');
+const automator = require('../Automator/automator');
 const converter = require('../Converter/converter');
 
 let workflow = {};
 
-workflow.init = (workflowPath) => {
-  createWindow(workflowPath);
-}
+// workflow.init = (workflowPath) => {
+//   createWindow(workflowPath);
+// }
 
 function openAlertDialog(data) {
   const options = {
@@ -21,7 +22,7 @@ function openAlertDialog(data) {
   dialog.showMessageBox(options);
 }
 
-function createWindow(workflowPath) {
+function createWindow(data) {
   workflow.window = new BrowserWindow({
     icon: config.ICON_PATH,
     width: 1280,
@@ -39,17 +40,13 @@ function createWindow(workflowPath) {
   workflow.window.loadURL(url.format({
     pathname: path.join(__dirname, '../../components', 'Workflow', 'workflow.html'),
     protocol: 'file:',
-    slashes: true
+    slashes: true,
+    query: data ? {"rootDir": data.rootDir, "src": data.src} : {}
   }));
   // Handle garbage collection
   workflow.window.on('close', function () {
     workflow.window = null;
   });
-  if(workflowPath) {
-    let workflowData = { path: workflowPath };
-    generateWorkflow(workflowPath, workflowData, null);
-    workflow.window.webContents.send('set-workflow', workflowData);
-  }
 }
 
 function generateWorkflow(dir, obj, src) {
@@ -69,8 +66,6 @@ function generateWorkflow(dir, obj, src) {
             let kvp = stringArray[i].split('=');
             if (kvp[1]) {
               parameters[kvp[0]] = kvp[1];
-              if (!src && kvp[0] == 'src')
-                src = kvp[1];
             }
           }
         }
@@ -121,6 +116,15 @@ function saveConfig(dir, parameters) {
 }
 
 // Event listeners
+ipcMain.handle('get-workflow', async (e, data) => {
+  console.log(data);
+  if(data) {
+    let workflowData = { path: data.rootDir };
+    generateWorkflow(data.rootDir, workflowData, data.src);
+    return workflowData;
+  } else
+    return null;
+});
 
 ipcMain.handle('get-source-formats', async () => {
   return await converter.getSourceFormats();
@@ -154,7 +158,8 @@ ipcMain.on('workflow:edit', function (e, data) {
 });
 
 ipcMain.on('workflow:save', function (e, data) {
-  config.addWorkflowItem(data.path);
+  if(config.addWorkflowItem(data.path, data.src))
+    automator.restart();
   if (!fs.existsSync(data.path)) {
     fs.mkdir(data.path, (err) => {
       if (err)

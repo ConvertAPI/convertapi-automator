@@ -52,26 +52,33 @@ class Config {
         return this.workflows;
     }
 
-    addWorkflowItem(path) {
+    addWorkflowItem(rootDir, src) {
         let dataJson = fs.readFileSync(CONFIG_PATH);
+        let result = false;
         if(dataJson) {
             let data = JSON.parse(dataJson);
             if(!data.workflows)
                 data.workflows = [];
-            else if(!data.workflows.find(x=>x.path.localeCompare(path) == 0)) {
-                data.workflows.push({path: path});
-                this.workflows = data.workflows;
-                this.storeToFile(data);
+            if(!data.workflows.find(x=>x.path.localeCompare(rootDir) == 0)) { {
+                // add item
+                result = true;
+                data.workflows.push({path: rootDir, src: src});
             }
+            } else if(data.workflows.find(x=>x.path.localeCompare(rootDir) == 0).src != src) {
+                // update item
+                data.workflows[data.workflows.findIndex(x=> x.path.localeCompare(rootDir) == 0)] = ({path: rootDir, src: src});
+            }
+            this.workflows = data.workflows;
+            this.storeToFile(data);
         }
+        return result;
     }
 
     deleteWorkflowItem(rootDir) {
         let dataJson = fs.readFileSync(CONFIG_PATH);
         let data = JSON.parse(dataJson);
-        if(data.workflows && data.workflows.find(x=> x.path.localeCompare(rootDir) == 0).length > 0) {
-            let todelete = data.workflows.splice(data.workflows.indexOf(x=> x.path.localeCompare(rootDir) == 0),1)
-            console.log(todelete);
+        if(data.workflows && data.workflows.find(x=> x.path.localeCompare(rootDir) == 0)) {
+            let todelete = data.workflows.splice(data.workflows.findIndex(x=> x.path.localeCompare(rootDir) == 0),1)
             this.workflows = data.workflows;
             this.storeToFile(data);
         }
