@@ -93,19 +93,28 @@ ipcMain.on('folder:open', function(e, dirPath) {
   shell.showItemInFolder(dirPath);
 });
 
-ipcMain.on('files:add', function(e, dirPath) {
+ipcMain.on('files:select', function(e, rootDir) {
   // open file select dialog
   dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
   .then(result => {
     if(!result.canceled) {
-      for(let i = 0; i < result.filePaths.length; i++) {
-        // File destination.txt will be created or overwritten by default.
-        fs.copyFile(result.filePaths[0], path.join(dirPath, result.filePaths[0].replace(/^.*[\\\/]/, '')), (err) => {
-          if (err) throw err;
-        });
-      }
+      copyFilesToConverterDir(result.filePaths, rootDir)
     }
   })
 });
+
+ipcMain.on('files:add', function(e, data) {
+  copyFilesToConverterDir(data.filePaths, data.rootDir)
+});
+
+function copyFilesToConverterDir(filePaths, rootDir) {
+  console.log(filePaths);
+  console.log(rootDir);
+  for(let i = 0; i < filePaths.length; i++) {
+    fs.copyFile(filePaths[i], path.join(rootDir, filePaths[i].replace(/^.*[\\\/]/, '')), (err) => {
+      if (err) throw err;
+    });
+  }
+}
 
 module.exports = new Main();

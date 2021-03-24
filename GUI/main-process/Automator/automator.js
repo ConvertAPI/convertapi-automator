@@ -19,7 +19,6 @@ class Automator {
                 console.log(err)
                 console.log(data.toString());
             });
-
             // this.automatorProcess.stdout.on('data', (data) => {
             //     console.log(data.toString());
             // });

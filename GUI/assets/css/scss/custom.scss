@@ -87,6 +87,9 @@
         border: 2px dashed #cac7c7;
         margin:10px;
         padding:10px;
+        &.highlight {
+            border-color:$secondary-color;
+        }
         i.material-icons {
             color: #cac7c7;
         }
