@@ -8,10 +8,10 @@ const msiCreator = new MSICreator({
     appDirectory: APP_DIR,
     outputDirectory: OUT_DIR,
     description: 'The ConvertAPI Automator is a batch document converter software for Windows, macOS, and Linux for converting various files from one format to another.',
-    exe: 'convert-workflow.exe',
+    exe: 'convert-api-workflow.exe',
     name: 'ConvertAPI workflows',
     manufacturer: 'UAB Baltsoft',
-    version: '1.0.1',
+    version: '1.0.2',
     appIconPath: path.resolve(__dirname, './assets/icons/win/icon.ico'),
     ui: {
         chooseDirectory: true

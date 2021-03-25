@@ -1,13 +1,13 @@
 {
   "name": "convert-api-workflow",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "File conversion workflow desktop app",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package-mac": "electron-packager . --ignore=\"config.json\" --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
-    "package-win": "electron-packager . --ignore=\"config.json\" --overwrite --asar=true --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"ConvertAPI\"",
-    "package-linux": "electron-packager . --ignore=\"config.json\" --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/icon.png --prune=true --out=release-builds",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
+    "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"ConvertAPI\"",
+    "package-linux": "electron-packager . --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/icon.png --prune=true --out=release-builds",
     "scss": "sass --style=compressed --watch assets/css/scss:assets/css",
     "create-installer": "node build-installer.js"
   },
@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "auto-launch": "^5.0.5",
-    "electron": "^12.0.0"
+    "electron": "^12.0.0",
+    "electron-log": "^4.3.2"
   },
   "devDependencies": {
     "electron-packager": "^12.1.0",

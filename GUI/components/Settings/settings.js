@@ -1,7 +1,5 @@
 const electron = require('electron');
 const {ipcRenderer} = electron;
-const config = require('../../config/config');
-
 let elForm = document.querySelector('form');
 let elSecret = elForm.querySelector('#secret');
 let elActive = elForm.querySelector('#active');
@@ -10,14 +8,12 @@ let elConcurrency = elForm.querySelector('#concurrency');
 
 elForm.addEventListener('submit', (e) => submitForm(e));
 
-setValuesFromConfig();
-
-function setValuesFromConfig() {
-    elSecret.value = config.SECRET;
-    elActive.checked = config.ACTIVE;
-    elConcurrency.value = config.CONCURRENCY;
-    elAutolaunch.checked = config.START_ON_BOOT;
-}
+ipcRenderer.on('settings:set', function(e, config) {
+    elSecret.value = config.secret;
+    elActive.checked = config.active;
+    elConcurrency.value = config.concurrency;
+    elAutolaunch.checked = config.autolaunch;
+});
 
 function submitForm(e) {
     e.preventDefault();

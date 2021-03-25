@@ -3,14 +3,18 @@ const {app, Menu, shell, Tray } = electron;
 const mainWindow = require('./main-process/Main/main');
 const settingsWindow = require('./main-process/Settings/settings');
 const Automator = require('./main-process/Automator/automator');
-const config = require('./config/config')
+const config = require('./config/config');
+const log = require('electron-log');
 
 // SET ENV
 process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
-process.on('uncaughtException', callback)
-function callback(e) {
+
+process.on('uncaughtException', uncaughtExceptionCallback)
+function uncaughtExceptionCallback(e) {
   console.log(e);
+  log.error(e.toString());
 }
+
 // Listen for app to be ready
 app.on('ready', function() {
   // initialize app windows
