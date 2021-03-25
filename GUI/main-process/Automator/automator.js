@@ -1,5 +1,6 @@
 const child = require('child_process').execFile;
 const config = require('../../config/config');
+const log = require('electron-log');
 
 class Automator {
     constructor() {
@@ -18,12 +19,14 @@ class Automator {
             this.automatorProcess = child(config.AUTOMATOR_PATH, parameters, {shell: true}, function(err, data) {
                 console.log(err)
                 console.log(data.toString());
+                log.error(err.toString());
             });
             // this.automatorProcess.stdout.on('data', (data) => {
             //     console.log(data.toString());
             // });
             this.automatorProcess.stderr.on('data', (data) => {
                 console.log(data.toString());
+                log.error(data.toString());
             });
         }
     }
