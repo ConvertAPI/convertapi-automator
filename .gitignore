@@ -14,5 +14,7 @@
 /GUI/.vs
 /GUI/node_modules
 /GUI/release-builds
+/GUI/windows_installer
+/GUI/config.json
 WinConfig/bin
 WinConfig/obj

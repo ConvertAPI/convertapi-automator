@@ -1,13 +1,16 @@
 const electron = require('electron');
-const {app, Menu, ipcMain, shell, Tray} = electron;
+const {app, Menu, shell, Tray } = electron;
 const mainWindow = require('./main-process/Main/main');
 const settingsWindow = require('./main-process/Settings/settings');
 const Automator = require('./main-process/Automator/automator');
 const config = require('./config/config')
 
 // SET ENV
-process.env.NODE_ENV = 'development';
-
+process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
+process.on('uncaughtException', callback)
+function callback(e) {
+  console.log(e);
+}
 // Listen for app to be ready
 app.on('ready', function() {
   // initialize app windows
@@ -43,10 +46,6 @@ const mainMenuTemplate =  [
     label: 'File',
     submenu:[
       {
-        label:'Create new workflow',
-        accelerator: process.platform == 'darwin' ? 'Command+N' : 'Ctrl+N'
-      },
-      {
         label:'Top up your account',
         click() {
           shell.openExternal('https://www.convertapi.com/a/plans')
@@ -76,7 +75,24 @@ const mainMenuTemplate =  [
         }
       }
     ]
+  }, {
+    label: 'Help',
+    submenu:[
+      {
+        label:'Support',
+        click() {
+          shell.openExternal('https://help.convertapi.com')
+        }
+      },
+      {
+        label:'About',
+        click() {
+          shell.openExternal('https://www.convertapi.com/labs/automator')
+        }
+      }
+    ]
   }
+
 ];
 
 // If OSX, add empty object to menu

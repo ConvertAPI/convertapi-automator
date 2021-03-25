@@ -9,27 +9,48 @@ document.querySelectorAll('.js-create-workflow').forEach(element => {
   element.addEventListener('click', (e) => { ipcRenderer.send('workflow:create'); });
 });
 
+const updateOnlineStatus = () => { 
+  ipcRenderer.send('online-status-changed', navigator.onLine ? 'online' : 'offline')
+  let offlineOverlay = document.querySelector('#offline');
+  if(navigator.onLine)
+    offlineOverlay.classList.add('hidden');
+  else
+    offlineOverlay.classList.remove('hidden');
+}
+
+window.addEventListener('online', updateOnlineStatus)
+window.addEventListener('offline', updateOnlineStatus)
+updateOnlineStatus()
+
+// request workflows
+ipcRenderer.send('workflows:update');
+
 ipcRenderer.on('update-workflows', (e, data) => {
-  let wrapper = document.querySelector('.js-workflow-wrapper');
-  wrapper.innerHTML = "";
-  const template = document.getElementById('workflow-template');
-  data.forEach(workflow => {
-    if(workflow.path) {
-      let model = {};
-      let conversions = [ ];
-      generateWorkflow(workflow.path, model, workflow.src);
-      getConversions(model.nextStep, conversions);
-      const clone = template.content.cloneNode(true);
-      clone.querySelector('.card-content p').innerHTML = conversions.length > 0 ? workflow.src + ' &#8594; ' + conversions.join(' &#8594; ') : 'Please complete the set up';
-      clone.querySelector('.js-open-folder').addEventListener('click', (e) => { ipcRenderer.send('folder:open', path.join(workflow.path, ...conversions))});
-      clone.querySelector('.js-edit-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:edit', {"rootDir": workflow.path, "src": workflow.src})});
-      clone.querySelector('.js-delete-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:delete', workflow.path); });
-      let dropArea = clone.querySelector('.js-drop-area');
-      dropArea.addEventListener('click', (e) => { ipcRenderer.send('files:select', workflow.path); });
-      initDragAndDrop(dropArea, workflow.path);
-      wrapper.appendChild(clone);
-    }
-  });
+  if(data && data.length) {
+    document.querySelector('#placeholder').classList.add('hidden');
+    let wrapper = document.querySelector('.js-workflow-wrapper');
+    wrapper.innerHTML = "";
+    const template = document.getElementById('workflow-template');
+    data.forEach(workflow => {
+      if(workflow.path) {
+        let model = {};
+        let conversions = [ ];
+        generateWorkflow(workflow.path, model, workflow.src);
+        getConversions(model.nextStep, conversions);
+        const clone = template.content.cloneNode(true);
+        clone.querySelector('.card-content p').innerHTML = conversions.length > 0 ? workflow.src + ' &#8594; ' + conversions.join(' &#8594; ') : 'Please complete the set up';
+        clone.querySelector('.js-open-folder').addEventListener('click', (e) => { ipcRenderer.send('folder:open', path.join(workflow.path, ...conversions))});
+        clone.querySelector('.js-edit-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:edit', {"rootDir": workflow.path, "src": workflow.src})});
+        clone.querySelector('.js-delete-workflow').addEventListener('click', (e) => { ipcRenderer.send('workflow:delete', workflow.path); });
+        let dropArea = clone.querySelector('.js-drop-area');
+        dropArea.addEventListener('click', (e) => { ipcRenderer.send('files:select', workflow.path); });
+        initDragAndDrop(dropArea, workflow.path);
+        wrapper.appendChild(clone);
+      }
+    });
+  }
+  else
+    document.querySelector('#placeholder').classList.remove('hidden');
 });
 
 function initDragAndDrop(dropArea, rootDir) {

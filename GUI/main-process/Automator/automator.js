@@ -7,7 +7,7 @@ class Automator {
     }
 
     run() {
-        if(config.ACTIVE && (!this.automatorProcess || this.automatorProcess.killed)) {
+        if(config.ACTIVE && config.getWorkflows() && config.getWorkflows().length > 0 && (!this.automatorProcess || this.automatorProcess.killed)) {
             console.log('AUTOMATOR start')
             // run exe file with params
             let directories = '';

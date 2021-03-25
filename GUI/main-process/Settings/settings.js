@@ -49,7 +49,7 @@ function createSettingsWindow() {
   
 ipcMain.on('settings:save', (e, data) => {
     // save settings to config.json
-    config.saveSettings(data.secret, data.active, data.concurrency);
+    config.saveSettings(data.secret, data.active, data.concurrency, data.autolaunch);
     if(!data.active)
         automator.kill();
     else {

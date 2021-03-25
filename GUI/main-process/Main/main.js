@@ -8,7 +8,10 @@ const loginWindow = require('../Login/login');
 const workflowWindow = require('../Workflow/workflow');
 
 class Main {
-  constructor() { this.window; }
+  constructor() {
+    this.window;
+    this.initialized;
+  }
 
   init() {
     this.window = new BrowserWindow({
@@ -27,39 +30,41 @@ class Main {
     this.window.loadURL(url.format({
       pathname: path.join(__dirname, '../../components', 'Main', 'main.html'),
       protocol: 'file:',
-      slashes:true
+      slashes: true
     }));
 
-    // open sign in if secret not provided
-    if(!config.SECRET)
-      this.showLogin();
-    else 
-      automator.run();
-    
-  
     // Quit app when closed
-    this.window.on('closed', function() {
+    this.window.on('closed', function () {
       automator.kill();
       app.quit();
     });
 
-    this.window.webContents.once('dom-ready', () => {
-      this.updateWorkflows();
-    });
-
     // handle evets
     let _this = this;
-    ipcMain.on('workflows:update', function() {
+
+    ipcMain.on('online-status-changed', (event, status) => {
+      console.log(status);
+      if (!_this.initialized && status == 'online') {
+        _this.initialized = true;
+        // open sign in if secret not provided
+        if (!config.SECRET)
+          _this.showLogin();
+        else
+          automator.run();
+      }
+    });
+
+    ipcMain.on('workflows:update', function () {
       _this.updateWorkflows();
     });
 
-    ipcMain.on('workflow:delete', function(e, dirPath) {
+    ipcMain.on('workflow:delete', function (e, dirPath) {
       let options = {
-        buttons: ["Yes","No"],
+        buttons: ["Yes", "No"],
         message: "Do you really want to delete this workflow?"
       };
       dialog.showMessageBox(_this.window, options).then(result => {
-        if(result.response === 0) {
+        if (result.response === 0) {
           _this.deleteWorkflow(dirPath);
         }
       });
@@ -89,28 +94,28 @@ class Main {
   }
 };
 
-ipcMain.on('folder:open', function(e, dirPath) {
+ipcMain.on('folder:open', function (e, dirPath) {
   shell.showItemInFolder(dirPath);
 });
 
-ipcMain.on('files:select', function(e, rootDir) {
+ipcMain.on('files:select', function (e, rootDir) {
   // open file select dialog
   dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'] })
-  .then(result => {
-    if(!result.canceled) {
-      copyFilesToConverterDir(result.filePaths, rootDir)
-    }
-  })
+    .then(result => {
+      if (!result.canceled) {
+        copyFilesToConverterDir(result.filePaths, rootDir)
+      }
+    })
 });
 
-ipcMain.on('files:add', function(e, data) {
+ipcMain.on('files:add', function (e, data) {
   copyFilesToConverterDir(data.filePaths, data.rootDir)
 });
 
 function copyFilesToConverterDir(filePaths, rootDir) {
   console.log(filePaths);
   console.log(rootDir);
-  for(let i = 0; i < filePaths.length; i++) {
+  for (let i = 0; i < filePaths.length; i++) {
     fs.copyFile(filePaths[i], path.join(rootDir, filePaths[i].replace(/^.*[\\\/]/, '')), (err) => {
       if (err) throw err;
     });

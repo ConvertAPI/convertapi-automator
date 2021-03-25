@@ -16,6 +16,7 @@ function setValuesFromConfig() {
     elSecret.value = config.SECRET;
     elActive.checked = config.ACTIVE;
     elConcurrency.value = config.CONCURRENCY;
+    elAutolaunch.checked = config.START_ON_BOOT;
 }
 
 function submitForm(e) {

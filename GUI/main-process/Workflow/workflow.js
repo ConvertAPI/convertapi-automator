@@ -8,10 +8,6 @@ const converter = require('../Converter/converter');
 
 let workflow = {};
 
-// workflow.init = (workflowPath) => {
-//   createWindow(workflowPath);
-// }
-
 function openAlertDialog(data) {
   const options = {
     type: data.type,

@@ -8,9 +8,10 @@ class Config {
                             : process.platform == 'darwin' ? path.join(__dirname, '../executables', 'mac', 'convertapi-automator_osx.tar')
                             : path.join(__dirname, '..', 'executables', 'linux', 'convertapi-automator_linux.tar');
     ICON_PATH = process.platform == 'win32' ? path.join(__dirname, '..', 'assets', 'icons', 'win', 'icon.ico') : path.join(__dirname, '../assets', 'icons', 'png', 'icon.png');
-    CARA_PATH = 'https://stag-v2.convertapi.com/';
+    CARA_PATH = 'https://v2.convertapi.com/';
     SECRET = '';
     ACTIVE = true;
+    START_ON_BOOT = false;
     CONCURRENCY = 10;
     workflows = [];
 
@@ -19,32 +20,43 @@ class Config {
     }
 
     loadSettings() {
-        let data = fs.readFileSync(CONFIG_PATH);
-        if(data.toString()) {
-            try {
-                let settings = JSON.parse(data);
-                this.SECRET = settings.secret;
-                this.ACTIVE = settings.active;
-                this.CONCURRENCY = settings.concurrency;
-                this.workflows = settings.workflows;
-              }
-              catch (err) {
-                console.log(err);
-              }
+        if (fs.existsSync(CONFIG_PATH)) {
+            // read from config.json
+            let data = fs.readFileSync(CONFIG_PATH);
+            if(data.toString()) {
+                try {
+                    let settings = JSON.parse(data);
+                    this.SECRET = settings.secret;
+                    if(typeof(settings.active) !== 'undefined')
+                        this.ACTIVE = settings.active;
+                    if(typeof(settings.startOnBoot) !== 'undefined')
+                        this.START_ON_BOOT = settings.startOnBoot;
+                    this.CONCURRENCY = settings.concurrency;
+                    this.workflows = settings.workflows;
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            }
+        } else {
+            // set defaults
+            this.saveSettings('', 'true', 10);
         }
     }
 
-    saveSettings(secret, active, concurrency) {
+    saveSettings(secret, active, concurrency, startOnBoot) {
         // create settings object to store in config.json
         let settings = {
-            secret: typeof(secret) == undefined ? this.SECRET : secret,
-            active: typeof(active) == undefined ? this.ACTIVE : active,
+            secret: typeof(secret) == 'undefined' ? this.SECRET : secret,
+            active: typeof(active) == 'undefined' ? this.ACTIVE : active,
+            startOnBoot: typeof(startOnBoot) == 'undefined' ? this.START_ON_BOOT : startOnBoot,
             concurrency: concurrency || this.CONCURRENCY
           };
           // set global settings
           this.ACTIVE = settings.active;
           this.SECRET = settings.secret;
-          this.CONCURRENCY = settings.concurrency; 
+          this.CONCURRENCY = settings.concurrency;
+          this.START_ON_BOOT = settings.startOnBoot;
           this.storeToFile(settings);
     }
 
