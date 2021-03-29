@@ -13,7 +13,6 @@ let workflow = {
 let query = querystring.parse(global.location.search);
 if(query['?rootDir'] && query['src']) {
     ipcRenderer.invoke('get-workflow', { "rootDir": query['?rootDir'], "src": query['src']}).then((data) => {
-        console.log(data);
         workflow.path = data.path;
         workflow.src = data.nextStep.src;
         workflow.nextStep = data.nextStep;
@@ -52,7 +51,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 ipcRenderer.on('workflow:save:done', function() {
-    ipcRenderer.send('workflows:update');
+    console.log('workflow:save:done');
+    ipcRenderer.send('workflows:request-update');
 });
 
 function addWorkflowItem() {
@@ -79,7 +79,7 @@ function addWorkflowItem() {
             }
         }
     } else {
-        ipcRenderer.send('open-alert-dialog', {type: 'error', message: 'Please complete the previous step first!'});
+        ipcRenderer.send('alert-dialog:open', {type: 'error', message: 'Please complete the previous step first!'});
     }
 }
 
@@ -329,7 +329,6 @@ function showConverterParameters(wrapper, src, dst) {
                         inputField.setAttribute('required', 'required');
                     }
                 }
-
                 input.querySelector('label').innerHTML = param.Label + (param.Required ? '<strong>*</strong>' : '');
                 input.querySelector('.helper-text').textContent = param.Description;
                 clone.querySelector('.parameter-group').appendChild(input);
@@ -365,4 +364,3 @@ function clearConverterHtml(wrapper) {
     wrapper.querySelector('.js-parameter-wrapper').classList.add('hidden');
     wrapper.querySelector('.js-parameter-wrapper').innerHTML = "";
 }
-

@@ -5,6 +5,7 @@ const url = require('url');
 const config = require('../../config/config');
 const automator = require('../Automator/automator');
 const converter = require('../Converter/converter');
+const log = require('electron-log');
 
 let workflow = {};
 
@@ -84,7 +85,7 @@ function saveWorkflowItem(flow, parentPath) {
     if (!fs.existsSync(currentPath)) {
       fs.mkdir(currentPath, (err) => {
         if (err)
-          console.log(err);
+          log.error(err);
         else {
           if (flow.parameters.length)
             saveConfig(currentPath, flow.parameters);
@@ -140,7 +141,7 @@ ipcMain.handle('folder:select', async (e, format) => {
   return result.filePaths[0];
 });
 
-ipcMain.on('open-alert-dialog', function (e, data) {
+ipcMain.on('alert-dialog:open', function (e, data) {
   openAlertDialog(data);
 });
 
@@ -158,7 +159,7 @@ ipcMain.on('workflow:save', function (e, data) {
   if (!fs.existsSync(data.path)) {
     fs.mkdir(data.path, (err) => {
       if (err)
-        console.log(err);
+        log.error(err);
       else
         saveWorkflowItem(data.nextStep, data.path);
     });

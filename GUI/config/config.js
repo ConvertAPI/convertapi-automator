@@ -44,7 +44,6 @@ class Config {
                     this.workflows = settings.workflows;
                 }
                 catch (err) {
-                    console.log(err);
                     log.error(err);
                 }
             }
@@ -111,7 +110,6 @@ class Config {
             var data = JSON.stringify(settings);
             fs.writeFile(this.CONFIG_PATH, data, function (err) {
                 if (err) {
-                    console.log(err.message);
                     log.error(err.message);
                     return;
                 }

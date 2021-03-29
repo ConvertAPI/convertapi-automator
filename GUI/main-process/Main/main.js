@@ -6,6 +6,7 @@ const config = require('../../config/config');
 const automator = require('../Automator/automator');
 const loginWindow = require('../Login/login');
 const workflowWindow = require('../Workflow/workflow');
+const log = require('electron-log');
 
 class Main {
   constructor() {
@@ -42,8 +43,7 @@ class Main {
     // handle evets
     let _this = this;
 
-    ipcMain.on('online-status-changed', (event, status) => {
-      console.log(status);
+    ipcMain.on('online-status:change', (event, status) => {
       if (!_this.initialized && status == 'online') {
         _this.initialized = true;
         // open sign in if secret not provided
@@ -54,7 +54,7 @@ class Main {
       }
     });
 
-    ipcMain.on('workflows:update', function () {
+    ipcMain.on('workflows:request-update', function () {
       _this.updateWorkflows();
     });
 
@@ -82,7 +82,7 @@ class Main {
   }
 
   updateWorkflows() {
-    this.window.webContents.send('update-workflows', config.getWorkflows());
+    this.window.webContents.send('workflows:update', config.getWorkflows());
   }
 
   getWindow() {
@@ -113,11 +113,10 @@ ipcMain.on('files:add', function (e, data) {
 });
 
 function copyFilesToConverterDir(filePaths, rootDir) {
-  console.log(filePaths);
-  console.log(rootDir);
   for (let i = 0; i < filePaths.length; i++) {
     fs.copyFile(filePaths[i], path.join(rootDir, filePaths[i].replace(/^.*[\\\/]/, '')), (err) => {
-      if (err) throw err;
+      if (err)
+        log.error(err);
     });
   }
 }

@@ -11,12 +11,12 @@ process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
 
 process.on('uncaughtException', uncaughtExceptionCallback)
 function uncaughtExceptionCallback(e) {
-  console.log(e);
   log.error(e.toString());
 }
 
 // Listen for app to be ready
 app.on('ready', function() {
+  log.info('Application started...');
   // initialize app windows
   mainWindow.init();
   // create system tray for allways-on application
@@ -26,6 +26,14 @@ app.on('ready', function() {
   // Insert menu
   Menu.setApplicationMenu(mainMenu);
 });
+
+app.on('window-all-closed', () => {
+  log.info('Application shutting down...')
+  Automator.kill();
+  if (process.platform !== 'darwin') {
+   app.quit();
+  }
+ });
 
 function createTray() {
     const tray = new Tray(config.ICON_PATH);

@@ -1,7 +1,6 @@
 const electron = require('electron');
 const {ipcRenderer} = electron;
 const fs = require('fs');
-const { type } = require('os');
 const path = require('path');
 
 document.querySelector('.js-open-settings').addEventListener('click', (e) => { ipcRenderer.send('settings:open'); });
@@ -10,7 +9,7 @@ document.querySelectorAll('.js-create-workflow').forEach(element => {
 });
 
 const updateOnlineStatus = () => { 
-  ipcRenderer.send('online-status-changed', navigator.onLine ? 'online' : 'offline')
+  ipcRenderer.send('online-status:change', navigator.onLine ? 'online' : 'offline')
   let offlineOverlay = document.querySelector('#offline');
   if(navigator.onLine)
     offlineOverlay.classList.add('hidden');
@@ -23,9 +22,10 @@ window.addEventListener('offline', updateOnlineStatus)
 updateOnlineStatus()
 
 // request workflows
-ipcRenderer.send('workflows:update');
+ipcRenderer.send('workflows:request-update');
 
-ipcRenderer.on('update-workflows', (e, data) => {
+ipcRenderer.on('workflows:update', (e, data) => {
+  console.log(data);
   if(data && data.length) {
     document.querySelector('#placeholder').classList.add('hidden');
     let wrapper = document.querySelector('.js-workflow-wrapper');
@@ -66,7 +66,6 @@ function initDragAndDrop(dropArea, rootDir) {
     let dt = e.dataTransfer;
     let files = [];
     for(let i = 0; i<dt.files.length; i++) {
-      console.log(dt.files[i]);
       files.push(dt.files[i].path);
     }
     let data = { "filePaths" : files, "rootDir": rootDir };

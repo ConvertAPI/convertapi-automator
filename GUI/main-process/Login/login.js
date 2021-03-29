@@ -59,13 +59,13 @@ class Login {
             _this.window.close(); 
             _this.window = null;
           } else {
-            e.sender.send('validation-error', 'Please top up your account!'); 
+            e.sender.send('validation:error', 'Please top up your account!'); 
             return false;
           }
         });
       }
       else {
-        e.sender.send('validation-error', 'Authorization error - bad secret'); 
+        e.sender.send('validation:error', 'Authorization error - bad secret'); 
         return false;
       }
     });

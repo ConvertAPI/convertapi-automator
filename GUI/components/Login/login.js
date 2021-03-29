@@ -20,6 +20,6 @@ function showValidationError(message = 'Authorization error - bad secret') {
   document.getElementById('validation-error').innerText = message;
 }
 
-ipcRenderer.on('validation-error', (e, msg) => {
+ipcRenderer.on('validation:error', (e, msg) => {
   showValidationError(msg);
 })
