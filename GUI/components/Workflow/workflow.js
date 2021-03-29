@@ -13,7 +13,9 @@ let workflow = {
 let query = querystring.parse(global.location.search);
 if(query['?rootDir'] && query['src']) {
     ipcRenderer.invoke('get-workflow', { "rootDir": query['?rootDir'], "src": query['src']}).then((data) => {
+        console.log(data);
         workflow.path = data.path;
+        workflow.src = data.nextStep.src;
         workflow.nextStep = data.nextStep;
         document.querySelector('#rootPathText').value = workflow.path;
         document.querySelector('#rootPath').filename = workflow.path;
@@ -270,7 +272,7 @@ function showConverterParameters(wrapper, src, dst) {
         const checkboxTemplate = document.getElementById('checkbox-template');
         const fileTemplate = document.getElementById('file-input-template');
         // create dynamic elements
-        converter[0].ConverterParameterGroups.filter(x=> x.Name !== 'Input' && x.Name !== 'Authentication').forEach(group => {
+        converter[0].ConverterParameterGroups.filter(x=> !hiddenParameterGroups().includes(x.Name)).forEach(group => {
             const clone = groupTemplate.content.cloneNode(true);
             clone.querySelector('legend').textContent = group.Name;
             group.ConverterParameters.forEach(param => {
@@ -353,6 +355,10 @@ function getInputType(str) {
         default:
             return 'text';
     }
+}
+
+function hiddenParameterGroups() {
+    return ['Input', 'Authentication', 'Output', 'Asynchronous']
 }
 
 function clearConverterHtml(wrapper) {

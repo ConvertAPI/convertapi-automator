@@ -113,7 +113,6 @@ function saveConfig(dir, parameters) {
 
 // Event listeners
 ipcMain.handle('get-workflow', async (e, data) => {
-  console.log(data);
   if(data) {
     let workflowData = { path: data.rootDir };
     generateWorkflow(data.rootDir, workflowData, data.src);

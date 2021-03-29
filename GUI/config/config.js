@@ -60,7 +60,8 @@ class Config {
             secret: typeof(secret) == 'undefined' ? this.SECRET : secret,
             active: typeof(active) == 'undefined' ? this.ACTIVE : active,
             startOnBoot: typeof(startOnBoot) == 'undefined' ? this.START_ON_BOOT : startOnBoot,
-            concurrency: concurrency || this.CONCURRENCY
+            concurrency: concurrency || this.CONCURRENCY,
+            workflows: this.workflows
           };
           // set global settings
           this.ACTIVE = settings.active;
@@ -108,7 +109,6 @@ class Config {
 
     storeToFile(settings) {
             var data = JSON.stringify(settings);
-            let configPath = this.CONFIG_PATH;
             fs.writeFile(this.CONFIG_PATH, data, function (err) {
                 if (err) {
                     console.log(err.message);

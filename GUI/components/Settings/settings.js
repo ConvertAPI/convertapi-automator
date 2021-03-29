@@ -8,7 +8,7 @@ let elConcurrency = elForm.querySelector('#concurrency');
 
 elForm.addEventListener('submit', (e) => submitForm(e));
 
-ipcRenderer.on('settings:set', function(e, config) {
+ipcRenderer.invoke('settings:get').then((config) => {
     elSecret.value = config.secret;
     elActive.checked = config.active;
     elConcurrency.value = config.concurrency;

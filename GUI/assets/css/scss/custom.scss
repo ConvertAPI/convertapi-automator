@@ -8,6 +8,13 @@
     color: rgba(0,0,0,0.54);
 }
 
+nav .nav-wrapper {
+    .brand-logo {
+        cursor: default;
+        pointer-events: none;
+    }
+}
+
 .cursor-pointer {
     cursor:pointer;
 }

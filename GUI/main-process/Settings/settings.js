@@ -37,13 +37,16 @@ function createSettingsWindow() {
       protocol: 'file:',
       slashes:true
     }));
-    settings.window.webContents.send('settings:set', {secret: config.SECRET, active: config.ACTIVE, concurrency: config.CONCURRENCY, autolaunch: config.START_ON_BOOT});
     // Handle garbage collection
     settings.window.on('close', function(){
         settings.window = null;
     });
   }
-  
+
+ipcMain.handle('settings:get', async (e) => {
+  return { secret: config.SECRET, active: config.ACTIVE, concurrency: config.CONCURRENCY, autolaunch: config.START_ON_BOOT };
+});
+
   ipcMain.on('settings:open', function(){
     createSettingsWindow();
   });
