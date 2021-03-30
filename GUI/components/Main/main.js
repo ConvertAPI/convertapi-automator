@@ -25,7 +25,6 @@ updateOnlineStatus()
 ipcRenderer.send('workflows:request-update');
 
 ipcRenderer.on('workflows:update', (e, data) => {
-  console.log(data);
   if(data && data.length) {
     document.querySelector('#placeholder').classList.add('hidden');
     let wrapper = document.querySelector('.js-workflow-wrapper');

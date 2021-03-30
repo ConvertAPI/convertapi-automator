@@ -1,16 +1,12 @@
-const { BrowserWindow, ipcMain } = require('electron');
-const AutoLaunch = require('auto-launch');
+const { BrowserWindow, ipcMain, app } = require('electron');
 const path = require('path');
 const url = require('url');
 const config = require('../../config/config');
 const automator = require('../Automator/automator');
 const mainWindow = require('../Main/main');
+const log = require('electron-log');
 
 let settings = {};
-
-let autoLauncher = new AutoLaunch({
-    name: "ConvertAPI workflows"
-});
 
 settings.init = () => {
     createSettingsWindow();
@@ -52,6 +48,18 @@ ipcMain.handle('settings:get', async (e) => {
   });
   
 ipcMain.on('settings:save', (e, data) => {
+  if(config.autolaunch != data.autolaunch && data.autolaunch == true)
+  {
+    log.info('enable autolaunch')
+      app.setLoginItemSettings({
+        openAtLogin: true,
+        path:process.execPath,
+        args: [
+          '--processStart', config.AUTOMATOR_PATH,
+          'process-start-args', automator.getParameters()
+        ]
+      });
+  }
     // save settings to config.json
     config.saveSettings(data.secret, data.active, data.concurrency, data.autolaunch);
     if(!data.active)
@@ -63,16 +71,5 @@ ipcMain.on('settings:save', (e, data) => {
     settings.window.close();
     settings.window = null;
 });
-
-ipcMain.on('autolaunch:enable', function() {
-    // Checking if autoLaunch is enabled, if not then enable it.
-    autoLauncher.isEnabled().then(function(isEnabled) {
-        if (isEnabled) return;
-        autoLauncher.enable();
-    }).catch(function (err) {
-        throw err;
-    });
-});
-
 
 module.exports = settings;
