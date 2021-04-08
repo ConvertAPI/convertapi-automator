@@ -133,6 +133,25 @@ nav .nav-wrapper {
         padding: 2rem;
         margin-bottom:50px;
         position:relative;
+        &.advanced {
+            .parameter-wrapper {
+                .input-field:not(.required), .parameter-group:not(.has-required-fields) {
+                    display:block;
+                }
+            }
+            .save-changes {
+                display:block;
+            }
+        }
+        .save-changes {
+            display:none;
+            margin:auto;
+        }
+        .parameter-wrapper {
+            .input-field:not(.required), .parameter-group:not(.has-required-fields) {
+                display:none;
+            }
+        }
         .connector {
             position:absolute;
             width:1px;

@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 ipcRenderer.on('workflow:save:done', function() {
-    console.log('workflow:save:done');
     ipcRenderer.send('workflows:request-update');
 });
 
@@ -83,7 +82,7 @@ function addWorkflowItem() {
     }
 }
 
-function saveChanges(wrapper, data) {
+function saveChanges(wrapper, data, hideSaveButton = true) {
     let id = wrapper.dataset.id;
     let workflowItem = workflow.nextStep;
     for(let i = 0; i < id; i++) {
@@ -97,12 +96,7 @@ function saveChanges(wrapper, data) {
     if(wrapper.dataset.id == 0)
         workflow.src = wrapper.dataset.src;
     finalDestination = wrapper.dataset.dst;
-    setUnsavedChanges(wrapper, false);
     ipcRenderer.send('workflow:save', workflow);
-}
-
-function setUnsavedChanges(wrapper, val) {
-    wrapper.querySelector('.js-save-changes').classList.toggle('hidden', !val)
 }
 
 function getWorkflowItemsCount() {
@@ -133,8 +127,7 @@ function sourceSelectInit(select) {
         const wrapper = e.target.closest('.js-workflow-item');
         wrapper.dataset.src = e.target.value;
         // reset DOM to initial state
-        clearConverterHtml(wrapper);
-        setUnsavedChanges(wrapper, false);
+        hideAdvancedParameters(wrapper);
         getDestinationSelect(wrapper).innerHTML = '<option value="" disabled selected>Convert to</option>';
         wrapper.querySelector('.js-title').textContent = "Select a conversion";
         populateDestinationFormats(e.target.value, wrapper);
@@ -145,13 +138,15 @@ function destinationSelectInit(select) {
     select.onchange = (e) => {
         const wrapper = e.target.closest('.js-workflow-item');
         wrapper.dataset.dst = e.target.value;
-        clearConverterHtml(wrapper);
+        hideAdvancedParameters(wrapper);
         if(e.target.value) {
             const src = getSourceSelect(wrapper).value;
             const dst = e.target.value;
             wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
             getShowParamsBtn(wrapper).classList.remove('hidden');
             saveChanges(wrapper);
+            // generate conversion parameters
+            generateConverterParameters(wrapper, src, dst);
         } else 
             getShowParamsBtn(wrapper).classList.add('hidden');
     }
@@ -178,10 +173,7 @@ function showParamsBtnInit(btn) {
         e.preventDefault();
         e.target.classList.add('hidden');
         const wrapper = e.target.closest('.js-workflow-item');
-        let src = wrapper.dataset.src;
-        let dst = wrapper.dataset.dst;
-        showConverterParameters(wrapper, src, dst);
-        setUnsavedChanges(wrapper, true);
+        wrapper.classList.add('advanced');
     }
 }
 
@@ -203,9 +195,14 @@ function formInit(form) {
         }
         if(isValid) {
             const wrapper = e.target.closest('.js-workflow-item');
-            clearConverterHtml(wrapper);
-            wrapper.querySelector('.js-show-params').classList.remove('hidden');
-            saveChanges(wrapper, formData);
+            let hideSaveButton = false;
+            // check if advanced view is on
+            if(wrapper.classList.contains('advanced')) {
+                hideSaveButton = true;
+                hideAdvancedParameters(wrapper);
+                wrapper.querySelector('.js-show-params').classList.remove('hidden');
+            }
+            saveChanges(wrapper, formData, hideSaveButton);
         } else {
             alert('Form has invalid properties. Please make sure you entered all values correctly.')
         }
@@ -219,10 +216,6 @@ function createWorkflowItem(model) {
     wrapper.dataset.id = totalLevels;
     totalLevels++;
     wrapper.dataset.src = model.src;
-    if(model.dst) {
-        wrapper.dataset.dst = model.dst;
-        getShowParamsBtn(wrapper).classList.remove('hidden');
-    }
     const srcSelect = clone.querySelector('.js-src-select');
     if(model.src) {
         srcSelect.innerHTML = "";
@@ -251,17 +244,15 @@ function createWorkflowItem(model) {
     showParamsBtnInit(clone.querySelector('.js-show-params'));
     formInit(clone.querySelector('form'));
     document.querySelector('.workflow-wrapper').append(clone);
-}
-
-function getParametersByLevel(level) {
-    let flow = workflow.nextStep;
-    for(let i = 0; i < level; i++) {
-        flow = flow.nextStep;
+    // generate conversion parameters
+    if(model.dst) {
+        wrapper.dataset.dst = model.dst;
+        getShowParamsBtn(wrapper).classList.remove('hidden');
+        generateConverterParameters(wrapper, model.src, model.dst);
     }
-    return flow.parameters;
 }
 
-function showConverterParameters(wrapper, src, dst) {
+function generateConverterParameters(wrapper, src, dst) {
     let format = { src: src, dst: dst };
     let level = wrapper.dataset.id;
     let parameters = getParametersByLevel(level);
@@ -327,6 +318,10 @@ function showConverterParameters(wrapper, src, dst) {
                     if(param.Required) {
                         input.querySelector('.input-field').classList.add('required');
                         inputField.setAttribute('required', 'required');
+                        inputField.onchange = (e) => {
+                            wrapper.querySelector('form button[type=submit]').click();
+                        }
+                        clone.querySelector('.parameter-group').classList.add('has-required-fields');
                     }
                 }
                 input.querySelector('label').innerHTML = param.Label + (param.Required ? '<strong>*</strong>' : '');
@@ -356,11 +351,18 @@ function getInputType(str) {
     }
 }
 
+function getParametersByLevel(level) {
+    let flow = workflow.nextStep;
+    for(let i = 0; i < level; i++) {
+        flow = flow.nextStep;
+    }
+    return flow.parameters;
+}
+
 function hiddenParameterGroups() {
     return ['Input', 'Authentication', 'Output', 'Asynchronous']
 }
 
-function clearConverterHtml(wrapper) {
-    wrapper.querySelector('.js-parameter-wrapper').classList.add('hidden');
-    wrapper.querySelector('.js-parameter-wrapper').innerHTML = "";
+function hideAdvancedParameters(wrapper) {
+    wrapper.classList.remove('advanced');
 }

@@ -28,25 +28,33 @@ class Config {
         this.loadSettings();
     }
 
-    loadSettings() {
+    readSettingsFromFile() {
+        let result;
         if (fs.existsSync(this.CONFIG_PATH)) {
             // read from config.json
             let data = fs.readFileSync(this.CONFIG_PATH);
             if(data.toString()) {
                 try {
-                    let settings = JSON.parse(data);
-                    this.SECRET = settings.secret;
-                    if(typeof(settings.active) !== 'undefined')
-                        this.ACTIVE = settings.active;
-                    if(typeof(settings.startOnBoot) !== 'undefined')
-                        this.START_ON_BOOT = settings.startOnBoot;
-                    this.CONCURRENCY = settings.concurrency;
-                    this.workflows = settings.workflows;
+                    result = JSON.parse(data);
                 }
                 catch (err) {
                     log.error(err);
                 }
             }
+        }
+        return result;
+    }
+
+    loadSettings() {
+        let settings = this.readSettingsFromFile();
+        if(settings) {
+            this.SECRET = settings.secret;
+            if(typeof(settings.active) !== 'undefined')
+                this.ACTIVE = settings.active;
+            if(typeof(settings.startOnBoot) !== 'undefined')
+                this.START_ON_BOOT = settings.startOnBoot;
+            this.CONCURRENCY = settings.concurrency;
+            this.workflows = settings.workflows;
         } else {
             // set defaults
             this.saveSettings('', 'true', 10);
@@ -75,23 +83,22 @@ class Config {
     }
 
     addWorkflowItem(rootDir, src) {
-        let dataJson = fs.readFileSync(this.CONFIG_PATH);
         let result = false;
-        if(dataJson) {
-            let data = JSON.parse(dataJson);
-            if(!data.workflows)
-                data.workflows = [];
-            if(!data.workflows.find(x=>x.path.localeCompare(rootDir) == 0)) { {
+        let settings = this.readSettingsFromFile();
+        if(settings) {
+            if(!settings.workflows)
+                settings.workflows = [];
+            if(!settings.workflows.find(x=>x.path.localeCompare(rootDir) == 0)) { {
                 // add item
                 result = true;
-                data.workflows.push({path: rootDir, src: src});
+                settings.workflows.push({path: rootDir, src: src});
             }
-            } else if(data.workflows.find(x=>x.path.localeCompare(rootDir) == 0).src != src) {
+            } else if(settings.workflows.find(x=>x.path.localeCompare(rootDir) == 0).src != src) {
                 // update item
-                data.workflows[data.workflows.findIndex(x=> x.path.localeCompare(rootDir) == 0)] = ({path: rootDir, src: src});
+                settings.workflows[settings.workflows.findIndex(x=> x.path.localeCompare(rootDir) == 0)] = ({path: rootDir, src: src});
             }
-            this.workflows = data.workflows;
-            this.storeToFile(data);
+            this.workflows = settings.workflows;
+            this.storeToFile(settings);
         }
         return result;
     }
@@ -110,7 +117,6 @@ class Config {
             var data = JSON.stringify(settings);
             fs.writeFile(this.CONFIG_PATH, data, function (err) {
                 if (err) {
-                    log.error(err.message);
                     return;
                 }
             });

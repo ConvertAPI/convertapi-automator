@@ -11,8 +11,9 @@ process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
 
 process.on('uncaughtException', uncaughtExceptionCallback)
 function uncaughtExceptionCallback(e) {
-  log.error(e.toString());
+  log.error(e);
 }
+//log.catchErrors();
 
 // Listen for app to be ready
 app.on('ready', function() {

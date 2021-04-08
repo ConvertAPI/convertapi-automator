@@ -48,7 +48,7 @@ ipcMain.handle('settings:get', async (e) => {
   });
   
 ipcMain.on('settings:save', (e, data) => {
-  if(config.autolaunch != data.autolaunch && data.autolaunch == true)
+  if(config.START_ON_BOOT != data.autolaunch && data.autolaunch == true)
   {
     log.info('enable autolaunch')
       app.setLoginItemSettings({
