@@ -21,7 +21,7 @@ if(query['?rootDir'] && query['src']) {
         let flow = workflow.nextStep;
         while(flow) {
             createWorkflowItem(flow);
-            finalDestination = flow.dst;
+            //finalDestination = flow.dst;
             flow = flow.nextStep;
         }
     });
@@ -52,6 +52,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
 ipcRenderer.on('workflow:save:done', function() {
     ipcRenderer.send('workflows:request-update');
+});
+
+ipcRenderer.on('workflow:validate', function() {
+    let invalidInputs = document.querySelectorAll('[required]:invalid');
+    if(invalidInputs.length)
+        invalidInputs[0].focus();
+    ipcRenderer.send('workflow:validate:response', invalidInputs.length);
 });
 
 function addWorkflowItem() {
@@ -95,7 +102,7 @@ function saveChanges(wrapper, data, hideSaveButton = true) {
     // set initial workflow step format
     if(wrapper.dataset.id == 0)
         workflow.src = wrapper.dataset.src;
-    finalDestination = wrapper.dataset.dst;
+    finalDestination = wrapper.dataset.dstExtensions;
     ipcRenderer.send('workflow:save', workflow);
 }
 
@@ -143,6 +150,7 @@ function destinationSelectInit(select) {
             const src = getSourceSelect(wrapper).value;
             const dst = e.target.value;
             wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
+            clearConverterHtml(wrapper);
             getShowParamsBtn(wrapper).classList.remove('hidden');
             saveChanges(wrapper);
             // generate conversion parameters
@@ -219,12 +227,24 @@ function createWorkflowItem(model) {
     const srcSelect = clone.querySelector('.js-src-select');
     if(model.src) {
         srcSelect.innerHTML = "";
-        let el = document.createElement("option");
-        el.textContent = model.src;
-        el.value = model.src;
-        srcSelect.appendChild(el);
-        srcSelect.value = model.src;
-        populateDestinationFormats(model.src, wrapper, model.dst);
+        if(Array.isArray(model.src)) {
+            model.src.forEach(elem => {
+                console.log(elem);
+                let el = document.createElement("option");
+                el.textContent = elem;
+                el.value = elem;
+                srcSelect.appendChild(el);
+            });
+            srcSelect.value = model.src[0];
+            populateDestinationFormats(model.src[0], wrapper, model.dst);
+        } else {
+            let el = document.createElement("option");
+            el.textContent = model.src;
+            el.value = model.src;
+            srcSelect.appendChild(el);
+            srcSelect.value = model.src;
+            populateDestinationFormats(model.src, wrapper, model.dst);
+        }
     } else {
         ipcRenderer.invoke('get-source-formats').then((formats) => {
             for(let i = 0; i < formats.length; i++) {
@@ -257,80 +277,90 @@ function generateConverterParameters(wrapper, src, dst) {
     let level = wrapper.dataset.id;
     let parameters = getParametersByLevel(level);
     ipcRenderer.invoke('get-converter', format).then((converter) => {
-        const groupTemplate = document.getElementById('parameter-group-template');
-        const inputTemplate = document.getElementById('input-template');
-        const selectTemplate = document.getElementById('select-template');
-        const checkboxTemplate = document.getElementById('checkbox-template');
-        const fileTemplate = document.getElementById('file-input-template');
-        // create dynamic elements
-        converter[0].ConverterParameterGroups.filter(x=> !hiddenParameterGroups().includes(x.Name)).forEach(group => {
-            const clone = groupTemplate.content.cloneNode(true);
-            clone.querySelector('legend').textContent = group.Name;
-            group.ConverterParameters.forEach(param => {
-                let inputType = getInputType(param.Type);
-                let input;
-                if(inputType == 'select') {
-                    input = selectTemplate.content.cloneNode(true);
-                    let select = input.querySelector('select');
-                    select.setAttribute('name', param.Name);
-                    if(param.Required)
-                        select.required = true;
-                    for (const property in param.Values) {
-                        let option = document.createElement("option");
-                        option.textContent = param.Values[property];
-                        option.value = property;
-                        select.appendChild(option);
-                        if(parameters && parameters[param.Name])
-                            select.value = parameters[param.Name];
-                        else
-                            select.value = param.Default;
-                    }
-                } else if(inputType.localeCompare('checkbox') == 0) {
-                    input = checkboxTemplate.content.cloneNode(true);
-                    let inputField = input.querySelector('input');
-                    inputField.setAttribute('name', param.Name);
-                    if(parameters && parameters[param.Name] !== undefined) {
-                        if(parameters[param.Name].localeCompare('true') == 0)
-                            inputField.setAttribute('checked', 'checked');
-                    }
-                    else if(param.Default)
-                        inputField.setAttribute('checked', 'checked');
-                } else if(inputType.localeCompare('file') == 0) {
-                    input = fileTemplate.content.cloneNode(true);
-                    let inputField = input.querySelector('input[type=file]');
-                    inputField.setAttribute('name', param.Name);
-                    if(param.Required)
-                        inputField.setAttribute('required', 'required');
-                    if(parameters && parameters[param.Name])
-                        inputField.value = parameters[param.Name];
-                    inputField.onchange = (e) => {
-                        e.target.closest('.file-field').querySelector('.file-path').value = e.target.value;
-                    }
-                } else {
-                    input = inputTemplate.content.cloneNode(true);
-                    let inputField = input.querySelector('input');
-                    inputField.setAttribute('type', inputType);
-                    inputField.setAttribute('name', param.Name);
-                    if(parameters && parameters[param.Name])
-                        inputField.value = parameters[param.Name];
-                    if(param.Default)
-                        inputField.setAttribute('placeholder', param.Default);
-                    if(param.Required) {
-                        input.querySelector('.input-field').classList.add('required');
-                        inputField.setAttribute('required', 'required');
-                        inputField.onchange = (e) => {
-                            wrapper.querySelector('form button[type=submit]').click();
+        if(converter.length > 0) {
+            wrapper.dataset.dstExtensions = converter[0].DestinationExtensions;
+            finalDestination = converter[0].DestinationExtensions;
+            const groupTemplate = document.getElementById('parameter-group-template');
+            const inputTemplate = document.getElementById('input-template');
+            const selectTemplate = document.getElementById('select-template');
+            const checkboxTemplate = document.getElementById('checkbox-template');
+            const fileTemplate = document.getElementById('file-input-template');
+            // create dynamic elements
+            converter[0].ConverterParameterGroups.filter(x=> !hiddenParameterGroups().includes(x.Name)).forEach(group => {
+                const clone = groupTemplate.content.cloneNode(true);
+                clone.querySelector('legend').textContent = group.Name;
+                group.ConverterParameters.forEach(param => {
+                    let inputType = getInputType(param.Type);
+                    let input;
+                    if(inputType == 'select') {
+                        input = selectTemplate.content.cloneNode(true);
+                        let select = input.querySelector('select');
+                        select.setAttribute('name', param.Name);
+                        if(param.Required) {
+                            select.required = true;
+                            clone.querySelector('.parameter-group').classList.add('has-required-fields');
                         }
-                        clone.querySelector('.parameter-group').classList.add('has-required-fields');
+                        for (const property in param.Values) {
+                            let option = document.createElement("option");
+                            option.textContent = param.Values[property];
+                            option.value = property;
+                            select.appendChild(option);
+                            if(parameters && parameters[param.Name])
+                                select.value = parameters[param.Name];
+                            else
+                                select.value = param.Default;
+                        }
+                    } else if(inputType.localeCompare('checkbox') == 0) {
+                        input = checkboxTemplate.content.cloneNode(true);
+                        let inputField = input.querySelector('input');
+                        inputField.setAttribute('name', param.Name);
+                        if(parameters && parameters[param.Name] !== undefined) {
+                            if(parameters[param.Name].localeCompare('true') == 0)
+                                inputField.setAttribute('checked', 'checked');
+                        }
+                        else if(param.Default)
+                            inputField.setAttribute('checked', 'checked');
+                    } else if(inputType.localeCompare('file') == 0) {
+                        input = fileTemplate.content.cloneNode(true);
+                        let inputField = input.querySelector('input[type=file]');
+                        inputField.setAttribute('name', param.Name);
+                        if(param.Required) {
+                            input.querySelector('.input-field').classList.add('required');
+                            clone.querySelector('.parameter-group').classList.add('has-required-fields');
+                            inputField.setAttribute('required', 'required');
+                        }
+                        //TODO: set file value
+                            //if(parameters && parameters[param.Name])
+                        //   inputField.value = parameters[param.Name];
+                        inputField.onchange = (e) => {
+                            e.target.closest('.file-field').querySelector('.file-path').value = e.target.value;
+                        }
+                    } else {
+                        input = inputTemplate.content.cloneNode(true);
+                        let inputField = input.querySelector('input');
+                        inputField.setAttribute('type', inputType);
+                        inputField.setAttribute('name', param.Name);
+                        if(parameters && parameters[param.Name])
+                            inputField.value = parameters[param.Name];
+                        if(param.Default)
+                            inputField.setAttribute('placeholder', param.Default);
+                        if(param.Required) {
+                            input.querySelector('.input-field').classList.add('required');
+                            inputField.setAttribute('required', 'required');
+                            inputField.onchange = (e) => {
+                                wrapper.querySelector('form button[type=submit]').click();
+                            }
+                            clone.querySelector('.parameter-group').classList.add('has-required-fields');
+                        }
                     }
-                }
-                input.querySelector('label').innerHTML = param.Label + (param.Required ? '<strong>*</strong>' : '');
-                input.querySelector('.helper-text').textContent = param.Description;
-                clone.querySelector('.parameter-group').appendChild(input);
-            });
-            wrapper.querySelector('.js-parameter-wrapper').appendChild(clone);
-            wrapper.querySelector('.js-parameter-wrapper').classList.remove('hidden');
-        })
+                    input.querySelector('label').innerHTML = param.Label + (param.Required ? '<strong>*</strong>' : '');
+                    input.querySelector('.helper-text').textContent = param.Description;
+                    clone.querySelector('.parameter-group').appendChild(input);
+                });
+                wrapper.querySelector('.js-parameter-wrapper').appendChild(clone);
+                wrapper.querySelector('.js-parameter-wrapper').classList.remove('hidden');
+            })
+        }
     });
 }
 
@@ -365,4 +395,8 @@ function hiddenParameterGroups() {
 
 function hideAdvancedParameters(wrapper) {
     wrapper.classList.remove('advanced');
+}
+
+function clearConverterHtml(wrapper) {
+    wrapper.querySelector('.js-parameter-wrapper').innerHTML = "";
 }

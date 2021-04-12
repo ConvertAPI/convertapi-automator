@@ -40,10 +40,40 @@ function createWindow(data) {
     slashes: true,
     query: data ? {"rootDir": data.rootDir, "src": data.src} : {}
   }));
-  // Handle garbage collection
-  workflow.window.on('close', function () {
-    workflow.window = null;
+  // Handle close event
+  workflow.window.on('close', function (ev) {
+      ev.preventDefault();
+      workflow.window.webContents.send('workflow:validate');
   });
+  ipcMain.on('workflow:validate:response', validateWorkflow);
+}
+
+function closeWindow() {
+  workflow.window.destroy();
+  workflow.window = null;
+  ipcMain.removeListener('workflow:validate:response', validateWorkflow)
+}
+
+function validateWorkflow(event, value) {
+  if(value == 0) {
+    closeWindow();
+  } else {
+    dialog.showMessageBox({
+      type: 'warning',
+      buttons: ['Ok', 'Close anyway'],
+      title: 'Incomplete',
+      message: 'Workflow is invalid. Please fill in all required fields.',
+      cancelId: 0,
+      defaultId: 1,
+      noLink: true
+    }).then((val) => {
+      if (val.response === 0) {
+        // Cancel the close process
+      } else if (workflow.window) {
+        closeWindow();
+      }
+    })
+  }
 }
 
 function generateWorkflow(dir, obj, src) {
