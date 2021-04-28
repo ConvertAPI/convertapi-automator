@@ -127,6 +127,13 @@ function saveWorkflowItem(flow, parentPath) {
         saveConfig(currentPath, flow.parameters);
       saveWorkflowItem(flow.nextStep, currentPath);
     }
+  } else {
+    // remove child directories if flow is null
+    fs.readdirSync(parentPath).filter(function (file) {
+      if(fs.statSync(path.join(parentPath,file)).isDirectory()) {
+            fs.rmdirSync(path.join(parentPath,file), { recursive: true });
+      }
+    });
   }
 }
 

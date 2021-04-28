@@ -144,19 +144,28 @@ function sourceSelectInit(select) {
 function destinationSelectInit(select) {
     select.onchange = (e) => {
         const wrapper = e.target.closest('.js-workflow-item');
-        wrapper.dataset.dst = e.target.value;
-        hideAdvancedParameters(wrapper);
-        if(e.target.value) {
-            const src = getSourceSelect(wrapper).value;
-            const dst = e.target.value;
-            wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
-            clearConverterHtml(wrapper);
-            getShowParamsBtn(wrapper).classList.remove('hidden');
-            saveChanges(wrapper);
-            // generate conversion parameters
-            generateConverterParameters(wrapper, src, dst);
+        let execute = false;
+        if((wrapper.dataset.id+1) < getWorkflowItemsCount()) {
+            if(window.confirm('Are you sure? Changing the destination format will remove all subsequent workflow steps.')) {
+                execute = true;
+            }
         } else 
-            getShowParamsBtn(wrapper).classList.add('hidden');
+            execute = true;
+        if(execute) {
+            wrapper.dataset.dst = e.target.value;
+            hideAdvancedParameters(wrapper);
+            if(e.target.value) {
+                const src = getSourceSelect(wrapper).value;
+                const dst = e.target.value;
+                wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
+                clearConverterHtml(wrapper);
+                getShowParamsBtn(wrapper).classList.remove('hidden');
+                saveChanges(wrapper);
+                // generate conversion parameters
+                generateConverterParameters(wrapper, src, dst);
+            } else 
+                getShowParamsBtn(wrapper).classList.add('hidden');
+        }
     }
 }
 
@@ -229,7 +238,6 @@ function createWorkflowItem(model) {
         srcSelect.innerHTML = "";
         if(Array.isArray(model.src)) {
             model.src.forEach(elem => {
-                console.log(elem);
                 let el = document.createElement("option");
                 el.textContent = elem;
                 el.value = elem;
@@ -258,6 +266,9 @@ function createWorkflowItem(model) {
     }
     clone.querySelector('.js-add-workflow-item').onclick = (e) => {
         addWorkflowItem();
+    }
+    clone.querySelector('.js-delete-workflow-step').onclick = (e) => {
+        deleteWorkflowItems(wrapper);
     }
     sourceSelectInit(clone.querySelector('.js-src-select'));
     destinationSelectInit(clone.querySelector('.js-dst-select'));
@@ -399,4 +410,27 @@ function hideAdvancedParameters(wrapper) {
 
 function clearConverterHtml(wrapper) {
     wrapper.querySelector('.js-parameter-wrapper').innerHTML = "";
+}
+
+function deleteWorkflowItems(wrapper) {
+    if(window.confirm('Are you sure you want to delete this and all subsequent actions?')) {
+        let startPos = wrapper.dataset.id;
+        let workflowItem = workflow.nextStep;
+        let i = 1;
+        while(i < startPos) {
+            finalDestination = document.querySelector(`.js-workflow-item[data-id='${i}']`).dataset.dstExtensions;
+            wrapper.dataset.dstExtensions
+            workflowItem = workflowItem.nextStep;
+            i++;
+        }
+        let totalItems = getWorkflowItemsCount();
+        for(i=startPos; i < totalItems; i++)
+        {
+            document.querySelector(`.js-workflow-item[data-id='${i}']`).remove();
+        }
+        totalLevels = getWorkflowItemsCount();
+        console.log(totalLevels);
+        workflowItem.nextStep = null;
+        ipcRenderer.send('workflow:save', workflow);
+    }
 }
