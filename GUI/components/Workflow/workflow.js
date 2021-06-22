@@ -10,6 +10,8 @@ let workflow = {
     nextStep: null
 }
 
+let converterThatProducesPDF = ['split','rotate','delete','compress','decompress','decrypt','encrypt','extract','merge','ocr','repair','squeeze','watermark','watermark-overlay','watermark-textbox'];
+
 let query = querystring.parse(global.location.search);
 if(query['?rootDir'] && query['src']) {
     ipcRenderer.invoke('get-workflow', { "rootDir": query['?rootDir'], "src": query['src']}).then((data) => {
@@ -145,13 +147,18 @@ function destinationSelectInit(select) {
     select.onchange = (e) => {
         const wrapper = e.target.closest('.js-workflow-item');
         let execute = false;
-        if((wrapper.dataset.id+1) < getWorkflowItemsCount()) {
+        if((parseInt(wrapper.dataset.id)+1) < getWorkflowItemsCount()) {
             if(window.confirm('Are you sure? Changing the destination format will remove all subsequent workflow steps.')) {
                 execute = true;
             }
         } else 
             execute = true;
+
         if(execute) {
+            // delete all subsequent workflow items
+            if(wrapper.nextElementSibling && wrapper.nextElementSibling.matches('.js-workflow-item')) 
+                deleteWorkflowItems(wrapper.nextElementSibling);
+
             wrapper.dataset.dst = e.target.value;
             hideAdvancedParameters(wrapper);
             if(e.target.value) {
@@ -246,6 +253,8 @@ function createWorkflowItem(model) {
             srcSelect.value = model.src[0];
             populateDestinationFormats(model.src[0], wrapper, model.dst);
         } else {
+            if(converterThatProducesPDF.includes(model.src))
+                model.src = 'pdf';
             let el = document.createElement("option");
             el.textContent = model.src;
             el.value = model.src;
@@ -268,7 +277,9 @@ function createWorkflowItem(model) {
         addWorkflowItem();
     }
     clone.querySelector('.js-delete-workflow-step').onclick = (e) => {
-        deleteWorkflowItems(wrapper);
+        if(window.confirm('Are you sure you want to delete this and all subsequent actions?')) {
+            deleteWorkflowItems(wrapper);
+        }
     }
     sourceSelectInit(clone.querySelector('.js-src-select'));
     destinationSelectInit(clone.querySelector('.js-dst-select'));
@@ -335,6 +346,9 @@ function generateConverterParameters(wrapper, src, dst) {
                         input = fileTemplate.content.cloneNode(true);
                         let inputField = input.querySelector('input[type=file]');
                         inputField.setAttribute('name', param.Name);
+                        if(parameters && parameters[param.Name])
+                            input.querySelector('.file-path').value = parameters[param.Name];
+
                         if(param.Required) {
                             input.querySelector('.input-field').classList.add('required');
                             clone.querySelector('.parameter-group').classList.add('has-required-fields');
@@ -413,13 +427,11 @@ function clearConverterHtml(wrapper) {
 }
 
 function deleteWorkflowItems(wrapper) {
-    if(window.confirm('Are you sure you want to delete this and all subsequent actions?')) {
         let startPos = wrapper.dataset.id;
         let workflowItem = workflow.nextStep;
         let i = 1;
         while(i < startPos) {
             finalDestination = document.querySelector(`.js-workflow-item[data-id='${i}']`).dataset.dstExtensions;
-            wrapper.dataset.dstExtensions
             workflowItem = workflowItem.nextStep;
             i++;
         }
@@ -429,8 +441,6 @@ function deleteWorkflowItems(wrapper) {
             document.querySelector(`.js-workflow-item[data-id='${i}']`).remove();
         }
         totalLevels = getWorkflowItemsCount();
-        console.log(totalLevels);
         workflowItem.nextStep = null;
         ipcRenderer.send('workflow:save', workflow);
-    }
 }

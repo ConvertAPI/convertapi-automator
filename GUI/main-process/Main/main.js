@@ -33,7 +33,7 @@ class Main {
       protocol: 'file:',
       slashes: true
     }));
-
+    workflowWindow.setParentWindow(this.window);
     // Quit app when closed
     this.window.on('closed', function () {
       automator.kill();

@@ -9,6 +9,10 @@ const log = require('electron-log');
 
 let workflow = {};
 
+workflow.setParentWindow = function(mainWindow) {
+  workflow.parent = mainWindow;
+}
+
 function openAlertDialog(data) {
   const options = {
     type: data.type,
@@ -28,6 +32,7 @@ function createWindow(data) {
     frame: true,
     modal: true,
     resizable: true,
+    parent: workflow.parent,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -112,6 +117,13 @@ function generateWorkflow(dir, obj, src) {
 function saveWorkflowItem(flow, parentPath) {
   if (flow) {
     let currentPath = path.join(parentPath, flow.dst);
+    // clear all redundand folders in case of destination change
+    fs.readdirSync(parentPath).filter(function (file) {
+      if(file != flow.dst && fs.statSync(path.join(parentPath,file)).isDirectory()) {
+            fs.rmdirSync(path.join(parentPath,file), { recursive: true });
+      }
+    });
+
     if (!fs.existsSync(currentPath)) {
       fs.mkdir(currentPath, (err) => {
         if (err)
@@ -119,7 +131,7 @@ function saveWorkflowItem(flow, parentPath) {
         else {
           if (flow.parameters.length)
             saveConfig(currentPath, flow.parameters);
-          saveWorkflowItem(flow.nextStep, currentPath);
+            saveWorkflowItem(flow.nextStep, currentPath);
         }
       });
     } else {
