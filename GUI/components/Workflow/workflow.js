@@ -10,8 +10,6 @@ let workflow = {
     nextStep: null
 }
 
-let converterThatProducesPDF = ['split','rotate','delete','compress','decompress','decrypt','encrypt','extract','merge','ocr','repair','squeeze','watermark','watermark-overlay','watermark-textbox'];
-
 let query = querystring.parse(global.location.search);
 if(query['?rootDir'] && query['src']) {
     ipcRenderer.invoke('get-workflow', { "rootDir": query['?rootDir'], "src": query['src']}).then((data) => {
@@ -43,6 +41,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     if(!workflow.nextStep)
                         addWorkflowItem();
                     ipcRenderer.send('workflow:save', workflow);
+                } else {
+                    ipcRenderer.send('alert-dialog:open', {type: 'error', message: 'Workflow in a selected directory already exists! Please select a different location.'});
                 }
             });
         }
@@ -239,7 +239,6 @@ function createWorkflowItem(model) {
     let wrapper = clone.querySelector('.js-workflow-item');
     wrapper.dataset.id = totalLevels;
     totalLevels++;
-    wrapper.dataset.src = model.src;
     const srcSelect = clone.querySelector('.js-src-select');
     if(model.src) {
         srcSelect.innerHTML = "";
@@ -250,20 +249,21 @@ function createWorkflowItem(model) {
                 el.value = elem;
                 srcSelect.appendChild(el);
             });
+            wrapper.dataset.src =  model.src[0];
             srcSelect.value = model.src[0];
-            populateDestinationFormats(model.src[0], wrapper, model.dst);
+            populateDestinationFormats(srcSelect.value, wrapper, model.dst);
         } else {
-            if(converterThatProducesPDF.includes(model.src))
-                model.src = 'pdf';
             let el = document.createElement("option");
             el.textContent = model.src;
             el.value = model.src;
             srcSelect.appendChild(el);
             srcSelect.value = model.src;
+            wrapper.dataset.src =  model.src;
             populateDestinationFormats(model.src, wrapper, model.dst);
         }
     } else {
         ipcRenderer.invoke('get-source-formats').then((formats) => {
+            wrapper.dataset.src = formats[0];
             for(let i = 0; i < formats.length; i++) {
                 let format = formats[i];
                 let el = document.createElement("option");
@@ -281,7 +281,7 @@ function createWorkflowItem(model) {
             deleteWorkflowItems(wrapper);
         }
     }
-    sourceSelectInit(clone.querySelector('.js-src-select'));
+    sourceSelectInit(srcSelect);
     destinationSelectInit(clone.querySelector('.js-dst-select'));
     showParamsBtnInit(clone.querySelector('.js-show-params'));
     formInit(clone.querySelector('form'));

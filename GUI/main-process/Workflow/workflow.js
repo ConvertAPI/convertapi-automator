@@ -103,7 +103,7 @@ function generateWorkflow(dir, obj, src) {
         }
       }
       obj.nextStep = {
-        src: src,
+        src: parameters['src'] ? parameters['src'] : src,
         dst: file,
         path: childPath,
         parameters: parameters,
@@ -129,14 +129,12 @@ function saveWorkflowItem(flow, parentPath) {
         if (err)
           log.error(err);
         else {
-          if (flow.parameters.length)
-            saveConfig(currentPath, flow.parameters);
-            saveWorkflowItem(flow.nextStep, currentPath);
+          saveConfig(currentPath, flow.parameters, flow.src);
+          saveWorkflowItem(flow.nextStep, currentPath);
         }
       });
     } else {
-      if (flow.parameters)
-        saveConfig(currentPath, flow.parameters);
+      saveConfig(currentPath, flow.parameters, flow.src);
       saveWorkflowItem(flow.nextStep, currentPath);
     }
   } else {
@@ -149,11 +147,18 @@ function saveWorkflowItem(flow, parentPath) {
   }
 }
 
-function saveConfig(dir, parameters) {
+function saveConfig(dir, parameters, src) {
   let fileContent = '';
-  for (let elem in parameters) {
-    fileContent += `${elem}=${parameters[elem]}\n`;
+
+  if(src)
+    fileContent += `src=${src}\n`;
+
+  if(parameters) {
+    for (let elem in parameters) {
+      fileContent += `${elem}=${parameters[elem]}\n`;
+    }
   }
+
   if (fileContent.length) {
     fs.writeFile(path.join(dir, 'config.txt'), fileContent, function (err) {
       if (err) throw err;
@@ -187,7 +192,11 @@ ipcMain.handle('folder:select', async (e, format) => {
   const result = await dialog.showOpenDialog(workflow.window, {
     properties: ['openDirectory']
   });
-  return result.filePaths[0];
+
+  if(!config.getWorkflows().find(x=>result.filePaths[0].indexOf(x.path) !== -1) && !config.getWorkflows().find(x=>x.path.indexOf(result.filePaths[0]) !== -1))
+    return result.filePaths[0];
+  else 
+    return null;
 });
 
 ipcMain.on('alert-dialog:open', function (e, data) {
