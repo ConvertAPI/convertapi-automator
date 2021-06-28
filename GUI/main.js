@@ -5,6 +5,8 @@ const settingsWindow = require('./main-process/Settings/settings');
 const Automator = require('./main-process/Automator/automator');
 const config = require('./config/config');
 const log = require('electron-log');
+// workaround for garbage collector in order to keep tray icon always available
+let tray = null;
 
 // SET ENV
 process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
@@ -37,19 +39,20 @@ app.on('window-all-closed', () => {
  });
 
 function createTray() {
-    const tray = new Tray(config.ICON_PATH);
+    tray = new Tray(config.ICON_PATH);
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: 'Open GUI',
-        click: () => console.log('Open GUI')
+        label: 'Open',
+        click: () => mainWindow.getWindow().show()
       },
       {
         label: 'Quit',
-        click: () => console.log('Quit GUI')
+        click: () => app.quit()
       }
     ]);
     tray.setContextMenu(contextMenu);
     tray.setToolTip('ConvertAPI Workflows');
+    tray.on('click', () => mainWindow.getWindow().show());
 }
 
 // Create menu template

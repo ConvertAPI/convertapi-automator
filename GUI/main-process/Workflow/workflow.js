@@ -192,9 +192,12 @@ ipcMain.handle('folder:select', async (e, format) => {
   const result = await dialog.showOpenDialog(workflow.window, {
     properties: ['openDirectory']
   });
-
-  if(!config.getWorkflows().find(x=>result.filePaths[0].indexOf(x.path) !== -1) && !config.getWorkflows().find(x=>x.path.indexOf(result.filePaths[0]) !== -1))
-    return result.filePaths[0];
+  let selectedDir = result.filePaths[0];
+  if(!config.getWorkflows().find(x=> selectedDir.indexOf(x.path) !== -1) && 
+     !config.getWorkflows().find(x=> x.path.indexOf(selectedDir) !== -1)) {
+        let files = fs.readdirSync(selectedDir);
+        return { path: selectedDir, empty: !files.length };
+  }
   else 
     return null;
 });

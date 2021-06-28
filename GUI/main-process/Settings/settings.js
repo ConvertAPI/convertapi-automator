@@ -48,11 +48,10 @@ ipcMain.handle('settings:get', async (e) => {
   });
   
 ipcMain.on('settings:save', (e, data) => {
-  if(config.START_ON_BOOT != data.autolaunch && data.autolaunch == true)
+  if(config.START_ON_BOOT != data.autolaunch)
   {
-    log.info('enable autolaunch')
       app.setLoginItemSettings({
-        openAtLogin: true,
+        openAtLogin: data.autolaunch,
         path:process.execPath,
         args: [
           '--processStart', config.AUTOMATOR_PATH,

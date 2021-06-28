@@ -33,14 +33,20 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelector('#rootPath').onclick = (e) => {
         e.preventDefault();
         if(!workflow.path) {
-            ipcRenderer.invoke('folder:select').then((path) => {
-                if(path) {
-                    workflow.path = path;
-                    document.querySelector('#rootPathText').value = path;
-                    // create new workflow
-                    if(!workflow.nextStep)
-                        addWorkflowItem();
-                    ipcRenderer.send('workflow:save', workflow);
+            ipcRenderer.invoke('folder:select').then((result) => {
+                if(result != null) {
+                    let execute = true;
+                    if(!result.empty) 
+                        execute = window.confirm('Directory is not empty. The files will be deleted from your selected folder. Do you want to continue?');
+                
+                    if(execute) {
+                        workflow.path = result.path;
+                        document.querySelector('#rootPathText').value = result.path;
+                        // create new workflow
+                        if(!workflow.nextStep)
+                            addWorkflowItem();
+                        ipcRenderer.send('workflow:save', workflow);
+                    }
                 } else {
                     ipcRenderer.send('alert-dialog:open', {type: 'error', message: 'Workflow in a selected directory already exists! Please select a different location.'});
                 }
