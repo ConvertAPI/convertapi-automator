@@ -1,5 +1,6 @@
 const electron = require('electron');
 const querystring = require('querystring');
+const { workflows } = require('../../config/config');
 const { ipcRenderer } = electron;
 
 let finalDestination = null;
@@ -170,7 +171,7 @@ function destinationSelectInit(select) {
             if(e.target.value) {
                 const src = getSourceSelect(wrapper).value;
                 const dst = e.target.value;
-                wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
+                wrapper.querySelector('.js-title').innerHTML = `Convert <strong>${src.toUpperCase()}</strong> to <strong>${dst.toUpperCase()}</strong>`;
                 clearConverterHtml(wrapper);
                 getShowParamsBtn(wrapper).classList.remove('hidden');
                 saveChanges(wrapper);
@@ -190,7 +191,7 @@ function populateDestinationFormats(src, wrapper, dst) {
             el.textContent = format;
             el.value = format;
             if(dst && dst == formats[i]) {
-                wrapper.querySelector('.js-title').textContent = `Convert ${src.toUpperCase()} to ${dst.toUpperCase()}`;
+                wrapper.querySelector('.js-title').innerHTML = `Convert <strong>${src.toUpperCase()}</strong> to <strong>${dst.toUpperCase()}</strong>`;
                 el.selected = true;
             }
             getDestinationSelect(wrapper).appendChild(el);
@@ -236,6 +237,7 @@ function formInit(form) {
         } else {
             alert('Form has invalid properties. Please make sure you entered all values correctly.')
         }
+        form.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
     }
 }
 
@@ -249,24 +251,26 @@ function createWorkflowItem(model) {
     if(model.src) {
         srcSelect.innerHTML = "";
         if(Array.isArray(model.src)) {
-            model.src.forEach(elem => {
-                let el = document.createElement("option");
-                el.textContent = elem;
-                el.value = elem;
-                srcSelect.appendChild(el);
-            });
+            // select appropriate format if multiple DestinationExtensions found
+            let parentWorkflow = getWorkflowByLevel(wrapper.dataset.id-1);
+            if(model.src.find(x=> x == parentWorkflow.dst))
+                model.src = parentWorkflow.dst;
+            else {
+                // by design, execution should never go here, unless there is a bug in CARA /info endpoint
+                model.src = model.src[0];
+                console.error(`${parentWorkflow.src} -> ${parentWorkflow.dst} conversion has multiple destination formats, but DestinationFileFormats do not match DestinationExtensions!`);
+            }
             wrapper.dataset.src =  model.src[0];
             srcSelect.value = model.src[0];
             populateDestinationFormats(srcSelect.value, wrapper, model.dst);
-        } else {
-            let el = document.createElement("option");
-            el.textContent = model.src;
-            el.value = model.src;
-            srcSelect.appendChild(el);
-            srcSelect.value = model.src;
-            wrapper.dataset.src =  model.src;
-            populateDestinationFormats(model.src, wrapper, model.dst);
-        }
+        } 
+        let el = document.createElement("option");
+        el.textContent = model.src;
+        el.value = model.src;
+        srcSelect.appendChild(el);
+        srcSelect.value = model.src;
+        wrapper.dataset.src =  model.src;
+        populateDestinationFormats(model.src, wrapper, model.dst);
     } else {
         ipcRenderer.invoke('get-source-formats').then((formats) => {
             wrapper.dataset.src = formats[0];
@@ -303,7 +307,7 @@ function createWorkflowItem(model) {
 function generateConverterParameters(wrapper, src, dst) {
     let format = { src: src, dst: dst };
     let level = wrapper.dataset.id;
-    let parameters = getParametersByLevel(level);
+    let parameters = getWorkflowByLevel(level).parameters;
     ipcRenderer.invoke('get-converter', format).then((converter) => {
         if(converter.length > 0) {
             wrapper.dataset.dstExtensions = converter[0].DestinationExtensions;
@@ -412,12 +416,12 @@ function getInputType(str) {
     }
 }
 
-function getParametersByLevel(level) {
+function getWorkflowByLevel(level) {
     let flow = workflow.nextStep;
     for(let i = 0; i < level; i++) {
         flow = flow.nextStep;
     }
-    return flow.parameters;
+    return flow;
 }
 
 function hiddenParameterGroups() {
