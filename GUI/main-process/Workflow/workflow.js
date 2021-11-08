@@ -188,6 +188,10 @@ ipcMain.handle('get-converter', async (e, format) => {
   return await converter.getConverter(format.src, format.dst);
 });
 
+ipcMain.handle('get-formats-by-destination', async (e, dst) => {
+  return await converter.getDestinationFormatsByDestinationOnly(dst);
+});
+
 ipcMain.handle('folder:select', async (e, format) => {
   const result = await dialog.showOpenDialog(workflow.window, {
     properties: ['openDirectory']

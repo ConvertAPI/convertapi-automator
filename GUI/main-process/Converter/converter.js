@@ -61,12 +61,30 @@ class Converter {
   }
 
   getDestinationFormats(srcFormat) {
+    if(Array.isArray(srcFormat))
+      srcFormat = srcFormat[0];
     return this.getConverterInfo().then(converterInfo => {
       let result = [];
-      converterInfo.filter(x=>x.SourceFileFormats.indexOf(srcFormat) > -1).forEach(converter => {
-        result.push(...converter.DestinationFileFormats);
-      })
+      if(srcFormat == 'any') {
+        converterInfo.forEach(converter => {
+          result.push(...converter.DestinationFileFormats);
+        })
+      } else {
+        converterInfo.filter(x=>x.SourceFileFormats.indexOf(srcFormat) > -1).forEach(converter => {
+          result.push(...converter.DestinationFileFormats);
+        })
+      }
       return result.filter(this.distinct).sort((a, b) => a.localeCompare(b));
+    });
+  }
+
+  
+  getDestinationFormatsByDestinationOnly(dst) {
+    // called only when first step is any -> * and converter not found
+    return this.getConverterInfo().then(converterInfo => {
+      return converterInfo.filter(x=> x.DestinationFileFormats.indexOf(dst) > -1)
+                          .sort((a, b) => Number(a.Alternative) - Number(b.Alternative))
+                          .map(x => x.DestinationExtensions).filter(this.distinct).flat();
     });
   }
 

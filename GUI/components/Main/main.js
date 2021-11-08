@@ -2,13 +2,15 @@ const electron = require('electron');
 const {ipcRenderer} = electron;
 const fs = require('fs');
 const path = require('path');
+const updater = require('update-electron-app')();
 
 document.querySelector('.js-open-settings').addEventListener('click', (e) => { ipcRenderer.send('settings:open'); });
+document.querySelector('.js-close-console').addEventListener('click', (e) => { toggleConsole(false) });
 document.querySelectorAll('.js-create-workflow').forEach(element => {
   element.addEventListener('click', (e) => { ipcRenderer.send('workflow:create'); });
 });
 
-const updateOnlineStatus = () => { 
+const updateOnlineStatus = () => {
   ipcRenderer.send('online-status:change', navigator.onLine ? 'online' : 'offline')
   let offlineOverlay = document.querySelector('#offline');
   if(navigator.onLine)
@@ -51,6 +53,53 @@ ipcRenderer.on('workflows:update', (e, data) => {
   else
     document.querySelector('#placeholder').classList.remove('hidden');
 });
+
+ipcRenderer.on('console:toggle', (e, visible) => {
+  toggleConsole(visible);
+});
+
+ipcRenderer.on('console:log', (e, data) => {
+  logToConsole(data);
+});
+
+ipcRenderer.on('console:error', (e, data) => {
+  logToConsole(data, true);
+});
+
+ipcRenderer.on('toast:show', (e, data) => {
+  showToast(data);
+});
+
+function logToConsole(data, isError = false) {
+  let datestamp = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}.${new Date().getMilliseconds()}`
+  let console = document.querySelector('.js-console-content')
+  console.innerHTML += `<p>${datestamp} > <span ${isError ? 'class="red darken-1"': ''}>${data}</span></p>`;
+  console.scrollTop = console.scrollHeight;
+  toggleConsole(true);
+}
+
+function toggleConsole(visible) {
+  if(visible)
+    document.querySelector('body').classList.add('console-open');
+  else
+    document.querySelector('body').classList.remove('console-open');
+}
+
+function showToast(data) {
+  let toast = document.querySelectorAll('.paper-snackbar')[0];
+  if(toast.classList.contains('show')) {
+    setTimeout(() => {
+      showToast(data);
+    }, 2000);
+  }
+  else {
+    toast.innerHTML = data;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 10000);
+  }
+}
 
 function initDragAndDrop(dropArea, rootDir) {
   ;['dragenter', 'dragover'].forEach(eventName => {

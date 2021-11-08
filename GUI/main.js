@@ -91,7 +91,20 @@ const mainMenuTemplate =  [
         }
       }
     ]
-  }, {
+  }, 
+  {
+    label: 'View',
+    submenu:[
+      {
+        label:'Show console',
+        accelerator: process.platform == 'darwin' ? 'Command+T' : 'Ctrl+T',
+        click() {
+          mainWindow.toggleConsole(true);
+        }
+      }
+    ]
+  }, 
+  {
     label: 'Help',
     submenu:[
       {
@@ -108,7 +121,6 @@ const mainMenuTemplate =  [
       }
     ]
   }
-
 ];
 
 // If OSX, add empty object to menu

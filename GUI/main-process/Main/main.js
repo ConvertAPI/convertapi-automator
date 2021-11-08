@@ -50,7 +50,7 @@ class Main {
         if (!config.SECRET)
           _this.showLogin();
         else
-          automator.run();
+          automator.run(this.window);
       }
     });
 
@@ -83,6 +83,10 @@ class Main {
 
   updateWorkflows() {
     this.window.webContents.send('workflows:update', config.getWorkflows());
+  }
+
+  toggleConsole(show) {
+    this.window.webContents.send('console:toggle', show);
   }
 
   getWindow() {

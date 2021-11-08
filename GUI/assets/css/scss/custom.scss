@@ -87,14 +87,24 @@ nav .nav-wrapper {
     border: 2px dashed #cac7c7;
 }
 
+body.console-open {
+    padding-bottom:150px;
+    .console {
+        display: block;
+    }
+    .create-workflow-btn {
+        bottom:150px;
+    }
+    .paper-snackbar.show {
+        bottom:170px;
+    }
+}
+
 .main-wrapper {
-    &.console-open {
-        padding-bottom:150px;
-        .create-workflow-btn {
-            position: fixed;
-            right: 20px;
-            bottom: 150px;
-        }
+    .create-workflow-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
     }
     .card.workflow {
         text-align: center;
@@ -265,6 +275,7 @@ nav .nav-wrapper {
     background-color:#292929;
     color:white;
     z-index:2;
+    display: none;
     .header {
         width:100%;
         height:25px;
@@ -287,5 +298,54 @@ nav .nav-wrapper {
         font-family: courier;
         padding-left:25px;
         padding-right:25px;
+        overflow-y: auto;
+        height:125px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        p {
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+        &::-webkit-scrollbar {
+            display: none;
+        }
     }
 }
+
+// custom scrollbar
+::-webkit-scrollbar {
+    width:7px;
+}
+::-webkit-scrollbar-track {
+    background-color: #E3E3E3;
+}
+::-webkit-scrollbar-thumb {
+    background-color: darkgray;
+    border-radius:5px;
+}
+
+// toast
+.paper-snackbar {
+    transition-property: opacity, bottom, left, right, width, margin, border-radius;
+    transition-duration: 0.5s;
+    transition-timing-function: ease;
+    font-size: 14px;
+    min-height: 14px;
+    background-color: #323232;
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    line-height: 22px;
+    padding: 18px 24px;
+    bottom: 0px;
+    left: 20px;
+    margin-right:20px;
+    opacity: 0;
+    &.show {
+        opacity: 1;
+        bottom:20px;
+        z-index:3;
+    }
+  }

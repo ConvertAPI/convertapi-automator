@@ -22,7 +22,7 @@ if(query['?rootDir'] && query['src']) {
         let flow = workflow.nextStep;
         while(flow) {
             createWorkflowItem(flow);
-            //finalDestination = flow.dst;
+            finalDestination = flow.dst;
             flow = flow.nextStep;
         }
     });
@@ -112,6 +112,7 @@ function saveChanges(wrapper, data, hideSaveButton = true) {
     if(wrapper.dataset.id == 0)
         workflow.src = wrapper.dataset.src;
     finalDestination = wrapper.dataset.dstExtensions;
+    console.log(finalDestination)
     ipcRenderer.send('workflow:save', workflow);
 }
 
@@ -251,18 +252,23 @@ function createWorkflowItem(model) {
     if(model.src) {
         srcSelect.innerHTML = "";
         if(Array.isArray(model.src)) {
+            if(model.src.length > 1) {
             // select appropriate format if multiple DestinationExtensions found
             let parentWorkflow = getWorkflowByLevel(wrapper.dataset.id-1);
-            if(model.src.find(x=> x == parentWorkflow.dst))
+            if(model.src.find(x => x == parentWorkflow.dst))
                 model.src = parentWorkflow.dst;
             else {
-                // by design, execution should never go here, unless there is a bug in CARA /info endpoint
                 model.src = model.src[0];
-                console.error(`${parentWorkflow.src} -> ${parentWorkflow.dst} conversion has multiple destination formats, but DestinationFileFormats do not match DestinationExtensions!`);
+                if(model.src.length > 1)
+                // by design, execution should never go here, unless there is a bug in CARA /info endpoint
+                    console.error(`${parentWorkflow.src} -> ${parentWorkflow.dst} conversion has multiple destination formats, but DestinationFileFormats do not match DestinationExtensions!`);
             }
             wrapper.dataset.src =  model.src[0];
             srcSelect.value = model.src[0];
             populateDestinationFormats(srcSelect.value, wrapper, model.dst);
+            }
+            else
+                model.src = model.src[0];
         } 
         let el = document.createElement("option");
         el.textContent = model.src;
@@ -272,8 +278,8 @@ function createWorkflowItem(model) {
         wrapper.dataset.src =  model.src;
         populateDestinationFormats(model.src, wrapper, model.dst);
     } else {
+        // first workflow item
         ipcRenderer.invoke('get-source-formats').then((formats) => {
-            wrapper.dataset.src = formats[0];
             for(let i = 0; i < formats.length; i++) {
                 let format = formats[i];
                 let el = document.createElement("option");
@@ -281,6 +287,9 @@ function createWorkflowItem(model) {
                 el.value = format;
                 srcSelect.appendChild(el);
             }
+            srcSelect.value = 'any';
+            wrapper.dataset.src = 'any';
+            populateDestinationFormats(srcSelect.value, wrapper, model.dst);
         });
     }
     clone.querySelector('.js-add-workflow-item').onclick = (e) => {
@@ -299,7 +308,6 @@ function createWorkflowItem(model) {
     // generate conversion parameters
     if(model.dst) {
         wrapper.dataset.dst = model.dst;
-        getShowParamsBtn(wrapper).classList.remove('hidden');
         generateConverterParameters(wrapper, model.src, model.dst);
     }
 }
@@ -310,8 +318,10 @@ function generateConverterParameters(wrapper, src, dst) {
     let parameters = getWorkflowByLevel(level).parameters;
     ipcRenderer.invoke('get-converter', format).then((converter) => {
         if(converter.length > 0) {
+            getShowParamsBtn(wrapper).classList.remove('hidden');
+            wrapper.querySelector('.js-add-workflow-item').classList.remove('hidden');
             wrapper.dataset.dstExtensions = converter[0].DestinationExtensions;
-            finalDestination = converter[0].DestinationExtensions;
+            // finalDestination = converter[0].DestinationExtensions;
             const groupTemplate = document.getElementById('parameter-group-template');
             const inputTemplate = document.getElementById('input-template');
             const selectTemplate = document.getElementById('select-template');
@@ -395,6 +405,18 @@ function generateConverterParameters(wrapper, src, dst) {
                 wrapper.querySelector('.js-parameter-wrapper').appendChild(clone);
                 wrapper.querySelector('.js-parameter-wrapper').classList.remove('hidden');
             })
+        } else {
+            // converter not found - hide parameters btn and set dstExtensions to a selected destination
+            getShowParamsBtn(wrapper).classList.add('hidden');
+            ipcRenderer.invoke('get-formats-by-destination', wrapper.dataset.dst).then((destinations) => {
+                // finalDestination = destinations;
+                wrapper.dataset.dstExtensions = destinations;
+                if(destinations.length == 1) {
+                    wrapper.querySelector('.js-add-workflow-item').classList.remove('hidden');
+                }
+                else
+                    wrapper.querySelector('.js-add-workflow-item').classList.add('hidden');
+            });
         }
     });
 }

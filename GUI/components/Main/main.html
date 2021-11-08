@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ConvertAPI Workflows</title>
+  <title>ConvertAPI Document Converter</title>
   <link rel="stylesheet" href="../../assets/css/materialize.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="./main.js" defer></script>
@@ -11,7 +11,7 @@
     <div class="nav-wrapper">
       <div class="brand-logo center">
         <img src="../../assets/icons/png/icon@2x.png" width="25"/>
-          ConvertAPI Workflows
+          ConvertAPI Document Converter
       </a>
     </div>
     <ul class="right">
@@ -19,7 +19,7 @@
       <li><a href="javascript:void(0)" class="js-open-settings"><i class="material-icons">settings</i></a></li>
     </ul>
   </nav>
-  <div class="container main-wrapper console-open">
+  <div class="container main-wrapper" id="mainWrapper">
       <div id="placeholder" class="row mt-5 hidden">
         <h5>Please setup your first conversion workflow.</h5>
       </div>
@@ -27,17 +27,13 @@
     </div>
     <a class="btn-floating btn-large waves-effect waves-light create-workflow-btn js-create-workflow mb-2" title="Create new workflow"><i class="material-icons">add</i></a>
   </div>
+
   <div class="console">
-    <div class="header"><span>TERMINAL</span> <i class="material-icons">close</i></div>
-    <div class="content">
-      <p>
-        > Unable to convert: slider_puffin_before (1).jpg -> zip
-      </p>
-      <p>
-        > One or more errors occurred. (Conversion from jpg to zip error. Bad Request) (Conversion from jpg to zip error. Bad Request)
-      </p>
+    <div class="header"><span>TERMINAL OUTPUT</span> <i class="material-icons js-close-console">close</i></div>
+    <div class="content js-console-content">
     </div>
   </div>
+
   <div id="offline" class="hidden">
     <div class="overlay"></div>
     <div class="content">
@@ -47,6 +43,9 @@
       </div>
     </div>
   </div>
+
+  <div class="paper-snackbar"></div>
+
   <template id="workflow-template">
     <div class="col s12 m12 l6 xl4">
       <div class="card workflow js-workflow">
