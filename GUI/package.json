@@ -1,39 +1,62 @@
 {
-  "name": "convert-api-workflow",
-  "version": "1.0.2",
+  "name": "convertapi-document-converter",
+  "version": "1.0.3",
   "description": "File conversion workflow desktop app",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "package-mac": "electron-packager . --ignore=^windows_installer --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
-    "package-win": "electron-packager . --ignore=^windows_installer --overwrite --asar=false --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"ConvertAPI\"",
-    "package-linux": "electron-packager . --ignore=^windows_installer --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/icon.png --prune=true --out=release-builds",
-    "scss": "sass --style=compressed --watch assets/css/scss:assets/css",
-    "create-installer": "node build-installer.js"
-  },
+  "main": "src/main.js",
   "author": "UAB Baltsoft",
   "license": "MIT",
-  "mac": {
-    "icon": "./assets/icons/mac/icon.icns",
-    "category": "public.app-category.utilities"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ConvertAPI/convertapi-automator"
   },
-  "win": {
-    "icon": "./assets/icons/png/icon.png"
+  "scripts": {
+    "start": "electron .",
+    "scss": "sass --style=compressed --watch assets/css/scss:assets/css",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder -p onTag"
   },
-  "files": [
-    "./assets/**/*"
-  ],
-  "directories": {
-    "buildResources": "assets"
+  "build": {
+    "productName": "ConvertAPI Document Converter",
+    "appId": "convertapi-document-converter",
+    "files": [
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "build"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icons/win/icon.ico",
+      "publish": [
+        "github"
+      ]
+    },
+    "nsis": {
+      "installerIcon": "build/icons/win/icon.ico",
+      "installerHeaderIcon": "build/icons/win/icon.ico",
+      "deleteAppDataOnUninstall": true
+    },
+    "extends": null
   },
   "dependencies": {
-    "electron": "^12.2.2",
     "electron-log": "^4.3.2",
-    "update-electron-app": "^2.0.1"
+    "electron-updater": "^4.3.9"
   },
   "devDependencies": {
-    "electron-packager": "^12.1.0",
-    "electron-wix-msi": "^3.1.0",
+    "electron": "^12.2.2",
+    "electron-builder": "^22.13.1",
     "sass": "^1.32.8"
   }
 }

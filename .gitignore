@@ -13,6 +13,7 @@
 /Lib/obj
 /GUI/.vs
 /GUI/node_modules
+/GUI/dist
 /GUI/release-builds
 /GUI/windows_installer
 /GUI/config.json
