@@ -68,7 +68,7 @@ app.on('window-all-closed', () => {
       log.info('Update downloaded. Please restart the app to install the latest version.');
     });
     // check for updates once on app launch
-    autoUpdater.checkForUpdates();
+    autoUpdater.checkForUpdatesAndNotify();
     // native notification example:
     //new Notification({ title: 'Notification title', body: 'This is a test' }).show()
   }

@@ -1,7 +1,7 @@
 {
   "name": "ConvertAPI.DocumentConverter",
   "productName": "ConvertAPI Document Converter",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "File conversion workflow desktop app",
   "main": "src/main.js",
   "author": "UAB Baltsoft",
