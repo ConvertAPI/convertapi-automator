@@ -112,7 +112,6 @@ function saveChanges(wrapper, data, hideSaveButton = true) {
     if(wrapper.dataset.id == 0)
         workflow.src = wrapper.dataset.src;
     finalDestination = wrapper.dataset.dstExtensions;
-    console.log(finalDestination)
     ipcRenderer.send('workflow:save', workflow);
 }
 

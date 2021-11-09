@@ -19,31 +19,31 @@ function uncaughtExceptionCallback(e) {
 }
 //log.catchErrors();
 
-// auto updater
-autoUpdater.logger = log;
-autoUpdater.logger.transports.file.level = 'info';
-autoUpdater.on('checking-for-update', () => {
-  this.mainWindow.webContents.send('console:log', 'Checking for update...');
-})
-autoUpdater.on('update-available', (info) => {
-  this.mainWindow.webContents.send('console:log', 'Update available.');
-})
-autoUpdater.on('download-progress', (progressObj) => {
-  let log_message = "Download speed: " + progressObj.bytesPerSecond;
-  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-  log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-  this.mainWindow.webContents.send('console:log', log_message.toString());
-})
-autoUpdater.on('update-downloaded', (info) => {
-  this.mainWindow.webContents.send('console:log', 'Update downloaded. Please restart the app to install the latest version.');
-});
-
 // Listen for app to be ready
 app.on('ready', function() {
   // initialize app windows
   mainWindow.init();
   // check for updates
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.logger = log;
+  autoUpdater.logger.transports.file.level = 'info';
+  autoUpdater.on('checking-for-update', () => {
+    log.info('console:log', 'Checking for update...');
+  })
+  autoUpdater.on('update-available', (info) => {
+    log.info('console:log', 'Update available.');
+  })
+  autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    log.info('console:log', log_message.toString());
+  })
+  autoUpdater.on('update-downloaded', (info) => {
+    log.info('console:log', 'Update downloaded. Please restart the app to install the latest version.');
+  });
+  setInterval(() => {
+    autoUpdater.checkForUpdatesAndNotify();
+  }, 1000 * 30);
   // create system tray for allways-on application
   createTray();
   // Build menu from template

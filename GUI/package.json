@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ConvertAPI/convertapi-automator"
+    "url": "https://github.com/ConvertAPI/convertapi-automator/GUI"
   },
   "scripts": {
     "start": "electron .",

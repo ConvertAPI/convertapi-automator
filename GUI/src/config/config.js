@@ -21,12 +21,10 @@ class Config {
     workflows = [];
 
     constructor() {
-    console.log(__dirname)
         if(app) {
             let userDataPath = app.getPath('userData');
             this.CONFIG_PATH = path.join(userDataPath, 'config.json');
         }
-        console.log(this.CONFIG_PATH);
         this.loadSettings();
     }
 
