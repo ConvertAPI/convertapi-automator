@@ -17,19 +17,10 @@
   "build": {
     "files": [
       "src/**/*",
-      "node_modules/**/*",
       "package.json",
       "build"
     ],
-    "extraResources": [
-      {
-        "from": "./src/executables/",
-        "to": "executables",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
+    "extraResources": ["./executables/"],
     "directories": {
       "buildResources": "build"
     },

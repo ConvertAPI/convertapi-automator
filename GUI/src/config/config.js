@@ -8,9 +8,7 @@ const { app, dialog } = electron;
 log.transports.file.level = 'info';
 
 class Config {
-    AUTOMATOR_PATH = process.platform == 'win32' ? path.join(__dirname, '../executables', 'win', 'convertapi-automator.exe')
-                            : process.platform == 'darwin' ? path.join(__dirname, '../executables', 'mac', 'convertapi-automator_osx.tar')
-                            : path.join(__dirname, '..', 'executables', 'linux', 'convertapi-automator_linux.tar');
+    AUTOMATOR_PATH = '';
     ICON_PATH = process.platform == 'win32' ? path.join(__dirname, '..', '..', 'build', 'icons', 'win', 'icon.ico') : path.join(__dirname, '..', '../build', 'icons', 'png', 'icon.png');
     CARA_PATH = 'https://v2.convertapi.com/';
     CONFIG_PATH = '';
@@ -21,6 +19,17 @@ class Config {
     workflows = [];
 
     constructor() {
+        // when packaging the application the executables get copied to a different path
+        //TODO: process.env.NODE_ENV is null here!!!!!
+        if(process.env.NODE_ENV == 'production') 
+            this.AUTOMATOR_PATH = process.platform == 'win32' ? path.join(path.dirname(__dirname), '../../executables', 'win', 'convertapi-automator.exe')
+            : process.platform == 'darwin' ? path.join(path.dirname(__dirname), '../../executables', 'mac', 'convertapi-automator_osx.tar')
+            : path.join(path.dirname(__dirname), '..', '..', 'executables', 'linux', 'convertapi-automator_linux.tar');
+        else
+            this.AUTOMATOR_PATH = process.platform == 'win32' ? path.join(path.dirname(__dirname), '../executables', 'win', 'convertapi-automator.exe')
+            : process.platform == 'darwin' ? path.join(path.dirname(__dirname), '../executables', 'mac', 'convertapi-automator_osx.tar')
+            : path.join(path.dirname(__dirname), '..', 'executables', 'linux', 'convertapi-automator_linux.tar');
+
         if(app) {
             let userDataPath = app.getPath('userData');
             this.CONFIG_PATH = path.join(userDataPath, 'config.json');
