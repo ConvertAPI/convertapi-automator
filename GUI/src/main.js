@@ -1,11 +1,12 @@
 const electron = require('electron');
-const {app, Menu, shell, Tray } = electron;
+const {app, Menu, shell, Tray, Notification} = electron;
 const mainWindow = require('./main-process/Main/main');
 const settingsWindow = require('./main-process/Settings/settings');
 const Automator = require('./main-process/Automator/automator');
 const config = require('./config/config');
 const log = require('electron-log');
 const {autoUpdater} = require("electron-updater");
+var pjson = require('../package.json');
 
 // workaround for garbage collector in order to keep tray icon always available
 let tray = null;
@@ -23,27 +24,13 @@ function uncaughtExceptionCallback(e) {
 app.on('ready', function() {
   // initialize app windows
   mainWindow.init();
+  // set application name for notifications
+  if (process.platform === 'win32')
+  {
+      app.setAppUserModelId(pjson.productName);
+  }
   // check for updates
-  autoUpdater.logger = log;
-  autoUpdater.logger.transports.file.level = 'info';
-  autoUpdater.on('checking-for-update', () => {
-    log.info('console:log', 'Checking for update...');
-  })
-  autoUpdater.on('update-available', (info) => {
-    log.info('console:log', 'Update available.');
-  })
-  autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-    log.info('console:log', log_message.toString());
-  })
-  autoUpdater.on('update-downloaded', (info) => {
-    log.info('console:log', 'Update downloaded. Please restart the app to install the latest version.');
-  });
-  setInterval(() => {
-    autoUpdater.checkForUpdatesAndNotify();
-  }, 1000 * 30);
+  initAutoUpdates();
   // create system tray for allways-on application
   createTray();
   // Build menu from template
@@ -59,6 +46,32 @@ app.on('window-all-closed', () => {
    app.quit();
   }
  });
+
+ function initAutoUpdates() {
+  if(process.env.NODE_ENV == 'production') {
+    autoUpdater.logger = log;
+    autoUpdater.logger.transports.file.level = 'info';
+    autoUpdater.on('checking-for-update', () => {
+      log.info('Checking for update...');
+    })
+    autoUpdater.on('update-available', (info) => {
+      log.info('Update available.');
+    })
+    autoUpdater.on('download-progress', (progressObj) => {
+      let log_message = "Download speed: " + progressObj.bytesPerSecond;
+      log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+      log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+      log.info(log_message.toString());
+    })
+    autoUpdater.on('update-downloaded', (info) => {
+      log.info('Update downloaded. Please restart the app to install the latest version.');
+    });
+    // check for updates once on app launch
+    autoUpdater.checkForUpdates();
+    // native notification example:
+    //new Notification({ title: 'Notification title', body: 'This is a test' }).show()
+  }
+ }
 
 function createTray() {
     tray = new Tray(config.ICON_PATH);

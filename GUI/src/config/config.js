@@ -24,6 +24,7 @@ class Config {
         if(app) {
             let userDataPath = app.getPath('userData');
             this.CONFIG_PATH = path.join(userDataPath, 'config.json');
+            console.log('Loading config from: ' + this.CONFIG_PATH)
         }
         this.loadSettings();
     }
@@ -56,6 +57,7 @@ class Config {
             this.CONCURRENCY = settings.concurrency;
             this.workflows = settings.workflows;
         } else {
+            log.error('Config not found, creating a blank one!')
             // set defaults
             this.saveSettings('', 'true', 10);
         }
