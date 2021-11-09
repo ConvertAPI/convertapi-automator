@@ -13,7 +13,8 @@
     "start": "electron .",
     "scss": "sass --style=compressed --watch assets/css/scss:assets/css",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder -p onTag"
+    "dist": "electron-builder -p onTag",
+    "publish": "electron-builder --win -p always"
   },
   "build": {
     "productName": "ConvertAPI Document Converter",
@@ -48,7 +49,12 @@
       "installerHeaderIcon": "build/icons/win/icon.ico",
       "deleteAppDataOnUninstall": true
     },
-    "extends": null
+    "extends": null,
+    "publish": [{
+      "provider": "github",
+      "owner": "iffy",
+      "repo": "electron-updater-example"
+    }]
   },
   "dependencies": {
     "electron-log": "^4.3.2",
