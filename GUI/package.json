@@ -1,7 +1,7 @@
 {
-  "name": "convertapi-document-converter",
+  "name": "ConvertAPI.DocumentConverter",
   "productName": "ConvertAPI Document Converter",
-  "version": "1.0.41",
+  "version": "1.0.42",
   "description": "File conversion workflow desktop app",
   "main": "src/main.js",
   "author": "UAB Baltsoft",
@@ -15,7 +15,6 @@
     "publish": "electron-builder --win -p always"
   },
   "build": {
-    "appId": "convertapi-document-converter",
     "files": [
       "src/**/*",
       "node_modules/**/*",
@@ -34,7 +33,8 @@
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "appx"
       ],
       "icon": "build/icons/win/icon.ico",
       "publish": [

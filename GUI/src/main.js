@@ -1,5 +1,5 @@
 const electron = require('electron');
-const {app, Menu, shell, Tray, Notification} = electron;
+const {app, Menu, shell, Tray, dialog, Notification} = electron;
 const mainWindow = require('./main-process/Main/main');
 const settingsWindow = require('./main-process/Settings/settings');
 const Automator = require('./main-process/Automator/automator');
@@ -42,6 +42,7 @@ app.on('ready', function() {
 app.on('window-all-closed', () => {
   log.info('Application shutting down...')
   Automator.kill();
+  tray.destroy();
   if (process.platform !== 'darwin') {
    app.quit();
   }
@@ -152,6 +153,12 @@ const mainMenuTemplate =  [
         label:'About',
         click() {
           shell.openExternal('https://www.convertapi.com/labs/automator')
+        }
+      },
+      {
+        label:'Version',
+        click() {
+          dialog.showMessageBox({title: 'Product version', message: `${pjson.productName} v${pjson.version}`});
         }
       }
     ]
