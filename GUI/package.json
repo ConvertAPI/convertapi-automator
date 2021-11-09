@@ -1,0 +1,68 @@
+{
+  "name": "convertapi-document-converter",
+  "version": "1.0.3",
+  "description": "File conversion workflow desktop app",
+  "main": "src/main.js",
+  "author": "UAB Baltsoft",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ConvertAPI/convertapi-automator/GUI"
+  },
+  "scripts": {
+    "start": "electron .",
+    "scss": "sass --style=compressed --watch assets/css/scss:assets/css",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder -p onTag",
+    "publish": "electron-builder --win -p always"
+  },
+  "build": {
+    "productName": "ConvertAPI Document Converter",
+    "appId": "convertapi-document-converter",
+    "files": [
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "build"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icons/win/icon.ico",
+      "publish": [
+        "github"
+      ]
+    },
+    "nsis": {
+      "installerIcon": "build/icons/win/icon.ico",
+      "installerHeaderIcon": "build/icons/win/icon.ico",
+      "deleteAppDataOnUninstall": true
+    },
+    "extends": null,
+    "publish": [{
+      "provider": "github",
+      "owner": "iffy",
+      "repo": "electron-updater-example"
+    }]
+  },
+  "dependencies": {
+    "electron-log": "^4.3.2",
+    "electron-updater": "^4.3.9"
+  },
+  "devDependencies": {
+    "electron": "^12.2.2",
+    "electron-builder": "^22.13.1",
+    "sass": "^1.32.8"
+  }
+}

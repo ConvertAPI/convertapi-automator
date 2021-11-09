@@ -11,3 +11,11 @@
 /Cli/Properties
 /Lib/bin/Debug/netcoreapp3.1
 /Lib/obj
+/GUI/.vs
+/GUI/node_modules
+/GUI/dist
+/GUI/release-builds
+/GUI/windows_installer
+/GUI/config.json
+WinConfig/bin
+WinConfig/obj

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Workflow editor</title>
+    <link rel="stylesheet" href="../../assets/css/materialize.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="workflow.js" defer></script>
+</head>
+
+<body class="workflow-editor">
+    <nav>
+        <div class="nav-wrapper">
+            <div class="brand-logo center">
+                <img src="../../../build/icons/png/icon@2x.png" width="25" />
+                    Conversion workflow setup
+                </a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-1">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="file-field input-field">
+                    <div class="btn">
+                        <span>Browse</span>
+                        <input type="file" id="rootPath" webkitdirectory onchange="setRootDir(event)">
+                    </div>
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" id="rootPathText" placeholder="Please select a working directory" type="text">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <p class="mb-5">
+                Pro tip: Once you set up the workflow you can simply drop a file into your workflow directory and it will be converted automatically.
+                This is useful when you want to create a file conversion flow on a server, where multiple users could access the converter flow via a shared network.
+            </p>
+        </div>
+        <div class="workflow-wrapper">
+        </div>
+    </div>
+    <template id="workflow-template">
+        <div class="workflow-item section z-depth-1 js-workflow-item">
+            <a href="javascript:void(0)" class="js-delete-workflow-step"><i class="material-icons right">delete</i></a>
+            <form>
+                <div class="row mb-0">
+                    <div class="col s12 m12 l12">
+                        <h5 class="js-title">Select a conversion</h5>
+                    </div>
+                    <div class="input-field col s5 m5 l5">
+                        <select class="browser-default js-src-select" name="src">
+                            <option value="" disabled selected>Convert from</option>
+                        </select>
+                    </div>
+                    <div class="input-field col s2 m2 l2 center">
+                        <p class="mt-1">
+                            TO
+                        </p>
+                    </div>
+                    <div class="input-field col s5 m5 l5">
+                        <select class="browser-default js-dst-select" name="dst">
+                            <option value="" disabled selected>Convert to</option>
+                        </select>
+                    </div>
+                    <div class="col s12 m12 parameter-wrapper js-parameter-wrapper hidden">
+                    </div>
+                    <div class="col s12 m12 l12 center-align">
+                        <a href="javascript:void(0)" class="btn mt-1 js-show-params hidden"><i class="material-icons left">edit</i>Edit parameters</a>
+                        <button type="submit" href="javascript:void(0)" class="btn mt-1 save-changes js-save-changes"><i class="material-icons left">check</i>Save changes</button>
+                    </div>
+                </div>
+            </form>
+            <div class="connector js-add-workflow-item"></div>
+        </div>
+    </template>
+    <template id="select-template">
+        <div class="input-field select">
+            <label class="active"></label>
+            <select class="browser-default">
+            </select>
+            <span class="helper-text"></span>
+        </div>
+    </template>
+    <template id="checkbox-template">
+        <div class="input-field">
+            <label class="active"></label>
+            <div class="switch">
+                <label>
+                  No
+                  <input type="checkbox" value="true">
+                  <span class="lever"></span>
+                  Yes
+                </label>
+              </div>
+            <span class="helper-text"></span>
+        </div>
+    </template>
+    <template id="input-template">
+        <div class="input-field">
+            <label class="active"></label>
+            <input type="text" value="">
+            <span class="helper-text"></span>
+        </div>
+    </template>
+    <template id="parameter-group-template">
+        <div class="parameter-group">
+            <legend>Required parameters</legend>
+        </div>
+    </template>
+    <template id="file-input-template">
+        <div class="file-field input-field">
+            <label class="active"></label>
+            <div class="btn">
+                <span>Browse</span>
+                <input type="file">
+            </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" placeholder="Please select a file" type="text">
+            </div>
+            <span class="helper-text"></span>
+        </div>
+    </template>
+</body>
+</html>
