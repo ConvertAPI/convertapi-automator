@@ -10,6 +10,7 @@ var pjson = require('../package.json');
 
 // workaround for garbage collector in order to keep tray icon always available
 let tray = null;
+let window = null;
 
 // SET ENV
 process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
@@ -20,35 +21,44 @@ function uncaughtExceptionCallback(e) {
 }
 //log.catchErrors();
 
-// Listen for app to be ready
-app.on('ready', function() {
-  // initialize app windows
-  mainWindow.init();
-  // set application name for notifications
-  if (process.platform === 'win32')
-  {
-      app.setAppUserModelId(pjson.productName);
-  }
-  // check for updates
-  initAutoUpdates();
-  // create system tray for allways-on application
-  createTray();
-  // Build menu from template
-  const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
-  // Insert menu
-  Menu.setApplicationMenu(mainMenu);
-});
+//Focus window on second instance run
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (window) {
+      window.maximize();
+      window.show();
+      window.focus();
+    }
+  });
 
-app.on('window-all-closed', () => {
-  log.info('Application shutting down...')
-  Automator.kill();
-  if (process.platform !== 'darwin') {
-   app.quit();
-  }
- });
+  // Listen for app to be ready
+  app.on('ready', function() {
+    // initialize app windows
+    window = mainWindow.init();
+    // set application name for notifications
+    if (process.platform === 'win32')
+    {
+        app.setAppUserModelId(pjson.productName);
+    }
+    // check for updates
+    initAutoUpdates();
+    // create system tray for allways-on application
+    createTray();
+    // Build menu from template
+    const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
+    // Insert menu
+    Menu.setApplicationMenu(mainMenu);
+  });
+}
 
 app.on('before-quit', function (evt) {
+  log.info('Application shutting down...')
   tray.destroy();
+  Automator.kill();
 });
 
  function initAutoUpdates() {
@@ -90,7 +100,7 @@ function createTray() {
       }
     ]);
     tray.setContextMenu(contextMenu);
-    tray.setToolTip('ConvertAPI Workflows');
+    tray.setToolTip('ConvertAPI Document Converter');
     tray.on('click', () => mainWindow.getWindow().show());
 }
 

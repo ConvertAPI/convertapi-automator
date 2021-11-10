@@ -38,14 +38,17 @@ class Main {
       slashes: true
     }));
     workflowWindow.setParentWindow(this.window);
-    // Quit app when closed
-    this.window.on('closed', function () {
-      automator.kill();
-      app.quit();
-    });
-
+    
     // handle evets
     let _this = this;
+
+    // Minimze app when closed
+    this.window.on('close', function (e) {
+      if(!app.isQuiting){
+        e.preventDefault();
+        _this.window.hide();
+      }
+    });
 
     ipcMain.on('online-status:change', (event, status) => {
       if (!_this.initialized && status == 'online') {
@@ -73,6 +76,7 @@ class Main {
         }
       });
     });
+    return this.window;
   }
 
   deleteWorkflow(dirPath) {
