@@ -28,7 +28,6 @@ if(query['?rootDir'] && query['src']) {
     });
 }
 
-
 // select root path to initialize workflow
 document.addEventListener("DOMContentLoaded", function() {
     document.querySelector('#rootPath').onclick = (e) => {
@@ -174,7 +173,6 @@ function destinationSelectInit(select) {
                 wrapper.querySelector('.js-title').innerHTML = `Convert <strong>${src.toUpperCase()}</strong> to <strong>${dst.toUpperCase()}</strong>`;
                 clearConverterHtml(wrapper);
                 getShowParamsBtn(wrapper).classList.remove('hidden');
-                saveChanges(wrapper);
                 // generate conversion parameters
                 generateConverterParameters(wrapper, src, dst);
             } else 
@@ -320,12 +318,13 @@ function generateConverterParameters(wrapper, src, dst) {
             getShowParamsBtn(wrapper).classList.remove('hidden');
             wrapper.querySelector('.js-add-workflow-item').classList.remove('hidden');
             wrapper.dataset.dstExtensions = converter[0].DestinationExtensions;
-            // finalDestination = converter[0].DestinationExtensions;
             const groupTemplate = document.getElementById('parameter-group-template');
             const inputTemplate = document.getElementById('input-template');
             const selectTemplate = document.getElementById('select-template');
             const checkboxTemplate = document.getElementById('checkbox-template');
             const fileTemplate = document.getElementById('file-input-template');
+            // saving here in order to have the finalDestination=DestinationExtensions loaded
+            saveChanges(wrapper);
             // create dynamic elements
             converter[0].ConverterParameterGroups.filter(x=> !hiddenParameterGroups().includes(x.Name)).forEach(group => {
                 const clone = groupTemplate.content.cloneNode(true);
@@ -408,13 +407,14 @@ function generateConverterParameters(wrapper, src, dst) {
             // converter not found - hide parameters btn and set dstExtensions to a selected destination
             getShowParamsBtn(wrapper).classList.add('hidden');
             ipcRenderer.invoke('get-formats-by-destination', wrapper.dataset.dst).then((destinations) => {
-                // finalDestination = destinations;
                 wrapper.dataset.dstExtensions = destinations;
                 if(destinations.length == 1) {
                     wrapper.querySelector('.js-add-workflow-item').classList.remove('hidden');
                 }
                 else
                     wrapper.querySelector('.js-add-workflow-item').classList.add('hidden');
+                // saving changes here to set finalDestination from dstExtensions
+                saveChanges(wrapper);
             });
         }
     });

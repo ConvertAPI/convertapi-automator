@@ -18,7 +18,9 @@ class Main {
     this.window = new BrowserWindow({
       icon: config.ICON_PATH,
       width: 1100,
+      height:700,
       opacity: 1,
+      show: false,
       webPreferences: {
         nodeIntegration: true,
         nodeIntegrationInWorker: true,
@@ -26,6 +28,8 @@ class Main {
         sandbox: false
       }
     });
+    this.window.maximize();
+    this.window.show();
     this.window.setIcon(config.ICON_PATH);
     // Load html in window
     this.window.loadURL(url.format({

@@ -19,9 +19,12 @@ class Config {
     workflows = [];
 
     constructor() {
+        if(app) {
+            let userDataPath = app.getPath('userData');
+            this.CONFIG_PATH = path.join(userDataPath, 'config.json');
+            
         // when packaging the application the executables get copied to a different path
-        //TODO: process.env.NODE_ENV is null here!!!!!
-        if(process.env.NODE_ENV == 'production') 
+        if(app.isPackaged) 
             this.AUTOMATOR_PATH = process.platform == 'win32' ? path.join(path.dirname(__dirname), '../../executables', 'win', 'convertapi-automator.exe')
             : process.platform == 'darwin' ? path.join(path.dirname(__dirname), '../../executables', 'mac', 'convertapi-automator_osx.tar')
             : path.join(path.dirname(__dirname), '..', '..', 'executables', 'linux', 'convertapi-automator_linux.tar');
@@ -30,12 +33,8 @@ class Config {
             : process.platform == 'darwin' ? path.join(path.dirname(__dirname), '../executables', 'mac', 'convertapi-automator_osx.tar')
             : path.join(path.dirname(__dirname), '..', 'executables', 'linux', 'convertapi-automator_linux.tar');
 
-        if(app) {
-            let userDataPath = app.getPath('userData');
-            this.CONFIG_PATH = path.join(userDataPath, 'config.json');
-            console.log('Loading config from: ' + this.CONFIG_PATH)
+            this.loadSettings();
         }
-        this.loadSettings();
     }
 
     readSettingsFromFile() {
@@ -66,7 +65,6 @@ class Config {
             this.CONCURRENCY = settings.concurrency;
             this.workflows = settings.workflows;
         } else {
-            log.error('Config not found, creating a blank one!')
             // set defaults
             this.saveSettings('', 'true', 10);
         }

@@ -42,11 +42,14 @@ app.on('ready', function() {
 app.on('window-all-closed', () => {
   log.info('Application shutting down...')
   Automator.kill();
-  tray.destroy();
   if (process.platform !== 'darwin') {
    app.quit();
   }
  });
+
+app.on('before-quit', function (evt) {
+  tray.destroy();
+});
 
  function initAutoUpdates() {
   if(process.env.NODE_ENV == 'production') {
