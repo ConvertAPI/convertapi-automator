@@ -11,6 +11,7 @@ var pjson = require('../package.json');
 // workaround for garbage collector in order to keep tray icon always available
 let tray = null;
 let window = null;
+let updateDownloaded = false;
 
 // SET ENV
 process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
@@ -41,9 +42,7 @@ if (!gotTheLock) {
     window = mainWindow.init();
     // set application name for notifications
     if (process.platform === 'win32')
-    {
         app.setAppUserModelId(pjson.productName);
-    }
     // check for updates
     initAutoUpdates();
     // create system tray for allways-on application
@@ -60,6 +59,8 @@ app.on('before-quit', function (evt) {
   window.close();
   tray.destroy();
   Automator.kill();
+  if(updateDownloaded)
+    autoUpdater.quitAndInstall();
 });
 
  function initAutoUpdates() {
@@ -80,6 +81,7 @@ app.on('before-quit', function (evt) {
     })
     autoUpdater.on('update-downloaded', (info) => {
       log.info('Update downloaded. Please restart the app to install the latest version.');
+      updateDownloaded = true;
     });
     // check for updates once on app launch
     autoUpdater.checkForUpdatesAndNotify();
