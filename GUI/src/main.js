@@ -57,6 +57,7 @@ if (!gotTheLock) {
 
 app.on('before-quit', function (evt) {
   log.info('Application shutting down...')
+  window.close();
   tray.destroy();
   Automator.kill();
 });

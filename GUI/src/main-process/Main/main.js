@@ -44,7 +44,7 @@ class Main {
 
     // Minimze app when closed
     this.window.on('close', function (e) {
-      if(!app.isQuiting){
+      if (!app.isQuiting) {
         e.preventDefault();
         _this.window.hide();
       }
