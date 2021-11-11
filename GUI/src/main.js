@@ -25,7 +25,8 @@ function uncaughtExceptionCallback(e) {
 //Focus window on second instance run
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
-  app.quit()
+  isQuitting = true;
+  app.quit();
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
@@ -72,6 +73,10 @@ app.on('before-quit', () => {
     autoUpdater.quitAndInstall();
 });
 
+app.on('window-all-closed', () => {
+  console.log('All windows are closed.')
+});
+
  function initAutoUpdates() {
   if(process.env.NODE_ENV == 'production') {
     autoUpdater.logger = log;
@@ -108,7 +113,10 @@ function createTray() {
       },
       {
         label: 'Quit',
-        click: () => app.quit()
+        click: () => {
+          isQuitting = true;
+          app.quit();
+        }
       }
     ]);
     tray.setContextMenu(contextMenu);
@@ -147,7 +155,8 @@ const mainMenuTemplate =  [
       {
         label: 'Quit',
         accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-        click(){
+        click() {
+          isQuitting = true;
           app.quit();
         }
       }
