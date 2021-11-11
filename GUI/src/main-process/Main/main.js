@@ -38,10 +38,13 @@ class Main {
       slashes: true
     }));
     workflowWindow.setParentWindow(this.window);
-    
     // handle evets
     let _this = this;
-
+    // Quit app when closed
+    this.window.on('closed', function () {
+      automator.kill();
+      app.quit();
+    });
     ipcMain.on('online-status:change', (event, status) => {
       if (!_this.initialized && status == 'online') {
         _this.initialized = true;
