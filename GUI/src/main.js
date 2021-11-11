@@ -11,7 +11,7 @@ var pjson = require('../package.json');
 // workaround for garbage collector in order to keep tray icon always available
 let tray = null;
 let window = null;
-let updateDownloaded = false;
+let updateDownloaded, isQuitting = false;
 
 // SET ENV
 process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
@@ -51,11 +51,20 @@ if (!gotTheLock) {
     const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
     // Insert menu
     Menu.setApplicationMenu(mainMenu);
+
+    // Minimze app when closed
+    window.on('close', function (e) {
+      if (!isQuitting) {
+        e.preventDefault();
+        window.hide();
+      }
+    });
   });
 }
 
-app.on('before-quit', function (evt) {
+app.on('before-quit', () => {
   log.info('Application shutting down...')
+  isQuitting = true;
   window.close();
   tray.destroy();
   Automator.kill();

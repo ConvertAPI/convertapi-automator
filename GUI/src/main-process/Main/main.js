@@ -42,14 +42,6 @@ class Main {
     // handle evets
     let _this = this;
 
-    // Minimze app when closed
-    this.window.on('close', function (e) {
-      if (!app.isQuiting) {
-        e.preventDefault();
-        _this.window.hide();
-      }
-    });
-
     ipcMain.on('online-status:change', (event, status) => {
       if (!_this.initialized && status == 'online') {
         _this.initialized = true;
