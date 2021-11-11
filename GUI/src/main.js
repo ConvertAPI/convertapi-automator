@@ -11,6 +11,7 @@ var pjson = require('../package.json');
 // workaround for garbage collector in order to keep tray icon always available
 let tray = null;
 let window = null;
+let updateDownloaded, isQuitting = false;
 
 // SET ENV
 process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
@@ -24,6 +25,7 @@ function uncaughtExceptionCallback(e) {
 //Focus window on second instance run
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
+  isQuitting = true;
   app.quit();
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
@@ -50,20 +52,30 @@ if (!gotTheLock) {
     const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
     // Insert menu
     Menu.setApplicationMenu(mainMenu);
+
+    // Minimze app when closed
+    window.on('close', function (e) {
+      if (!isQuitting) {
+        e.preventDefault();
+        window.hide();
+      }
+    });
   });
 }
 
 app.on('before-quit', () => {
   log.info('Application shutting down...')
+  isQuitting = true;
+  window.close();
   tray.destroy();
   Automator.kill();
+  if(updateDownloaded)
+    autoUpdater.quitAndInstall();
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-   app.quit();
-  }
- });
+  console.log('All windows are closed.')
+});
 
  function initAutoUpdates() {
   if(process.env.NODE_ENV == 'production') {
@@ -83,6 +95,7 @@ app.on('window-all-closed', () => {
     })
     autoUpdater.on('update-downloaded', (info) => {
       log.info('Update downloaded. Please restart the app to install the latest version.');
+      updateDownloaded = true;
     });
     // check for updates once on app launch
     autoUpdater.checkForUpdatesAndNotify();
@@ -100,7 +113,10 @@ function createTray() {
       },
       {
         label: 'Quit',
-        click: () => app.quit()
+        click: () => {
+          isQuitting = true;
+          app.quit();
+        }
       }
     ]);
     tray.setContextMenu(contextMenu);
@@ -140,6 +156,7 @@ const mainMenuTemplate =  [
         label: 'Quit',
         accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
         click() {
+          isQuitting = true;
           app.quit();
         }
       }
