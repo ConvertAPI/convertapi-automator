@@ -11,7 +11,7 @@ var pjson = require('../package.json');
 // workaround for garbage collector in order to keep tray icon always available
 let tray = null;
 let window = null;
-let updateDownloaded, isQuitting = false;
+let isQuitting = false;
 
 // SET ENV
 process.env.NODE_ENV = app.isPackaged ? 'production' : 'development';
@@ -69,12 +69,12 @@ app.on('before-quit', () => {
   window.close();
   tray.destroy();
   Automator.kill();
-  if(updateDownloaded)
-    autoUpdater.quitAndInstall();
 });
 
 app.on('window-all-closed', () => {
-  console.log('All windows are closed.')
+  console.log('All windows are closed. Quitting the app.')
+  if(process.platform !== 'darwin')
+    app.quit();
 });
 
  function initAutoUpdates() {
