@@ -150,7 +150,6 @@ namespace Lib
 
             if (string.IsNullOrEmpty(error)) { return output; }
             else { return error; }
-        }    
-        
+        }
     }
 }

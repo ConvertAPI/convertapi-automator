@@ -143,6 +143,10 @@ namespace Lib
             Cde?.AddCount();
             _concSem.Wait();
             
+            // workaround for any -> zip, otherwise the conversion fails
+            if (cfg.DestinationFormat == "zip")
+                srcFormat = "any";
+            
             return _convertApi.ConvertAsync(srcFormat, cfg.DestinationFormat, convertParams)
                 .ContinueWith(tr =>
                 {
@@ -183,7 +187,8 @@ namespace Lib
                     }
                     else
                     {
-                        Console.Error.WriteLine($"Unable to convert: {fileNamesStr} -> {cfg.DestinationFormat}\n{tr.Exception?.Flatten().Message}");
+                        var exception = tr.Exception?.InnerException as ConvertApiException;
+                        Console.Error.WriteLine($"Unable to convert: {fileNamesStr} -> {cfg.DestinationFormat}\n{tr.Exception?.Flatten().Message}\n{exception?.Response}");
                         Cde?.Signal();
                         if (Cde?.CurrentCount == 1) Cde?.Signal();    // Removing initial count to unblock wait
                     }
