@@ -73,8 +73,9 @@ function logToConsole(data, isError = false) {
   let datestamp = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}.${new Date().getMilliseconds()}`
   let console = document.querySelector('.js-console-content')
   console.innerHTML += `<p>${datestamp} > <span ${isError ? 'class="red darken-1"': ''}>${data}</span></p>`;
+  if(isError)
+    toggleConsole(true);
   console.scrollTop = console.scrollHeight;
-  toggleConsole(true);
 }
 
 function toggleConsole(visible) {
@@ -96,7 +97,7 @@ function showToast(data) {
     toast.classList.add('show');
     setTimeout(() => {
       toast.classList.remove('show');
-    }, 10000);
+    }, 7000);
   }
 }
 

@@ -74,6 +74,7 @@ class Converter {
           result.push(...converter.DestinationFileFormats);
         })
       }
+      //return result.filter(this.distinct).filter(x=> x!=='zip' && x!=='merge').sort((a, b) => a.localeCompare(b));
       return result.filter(this.distinct).sort((a, b) => a.localeCompare(b));
     });
   }

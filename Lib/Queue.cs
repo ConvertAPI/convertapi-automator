@@ -145,8 +145,17 @@ namespace Lib
             
             // workaround for any -> zip, otherwise the conversion fails
             if (cfg.DestinationFormat == "zip")
+            {
+                // change the source format to "any", and if single file is present, change the parameter name from "File" to "Files" (converter expects an array)
                 srcFormat = "any";
-            
+                var files = convertParams.Where(x => x.Name == "File");
+                if (files.Count() == 1)
+                {
+                    var file = (ConvertApiFileParam)files.First();
+                    convertParams[convertParams.IndexOf(file)] = new ConvertApiFileParam("Files", file.GetValueAsync().Result);
+                }
+            }
+
             return _convertApi.ConvertAsync(srcFormat, cfg.DestinationFormat, convertParams)
                 .ContinueWith(tr =>
                 {
@@ -169,7 +178,7 @@ namespace Lib
                                     resFile.SaveFileAsync(Path.Join(cfg.Directory.FullName, resFile.FileName))
                                         .ContinueWith(tfi =>
                                         {
-                                            Console.WriteLine(tfi.Result.FullName);
+                                            Console.WriteLine($"Result: {tfi.Result.FullName}");
                                             Cde?.Signal();
                                             if (Cde?.CurrentCount == 1) Cde?.Signal();    // Removing initial count to unblock wait
                                         });
