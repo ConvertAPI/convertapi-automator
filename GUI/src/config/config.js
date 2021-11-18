@@ -70,6 +70,10 @@ class Config {
         }
     }
 
+    getSecret() {
+        return this.SECRET;
+    }
+
     saveSettings(secret, active, concurrency, startOnBoot) {
         // create settings object to store in config.json
         let settings = {

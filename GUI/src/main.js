@@ -1,5 +1,5 @@
 const electron = require('electron');
-const {app, Menu, shell, Tray, dialog, Notification} = electron;
+const {app, Menu, shell, Tray, dialog, ipcMain } = electron;
 const mainWindow = require('./main-process/Main/main');
 const settingsWindow = require('./main-process/Settings/settings');
 const Automator = require('./main-process/Automator/automator');
@@ -73,8 +73,12 @@ app.on('before-quit', () => {
 
 app.on('window-all-closed', () => {
   console.log('All windows are closed. Quitting the app.')
-  if(process.platform !== 'darwin')
-    app.quit();
+  app.quit();
+});
+
+ipcMain.on('app:quit', function() {
+  isQuitting = true;
+  app.quit();
 });
 
  function initAutoUpdates() {

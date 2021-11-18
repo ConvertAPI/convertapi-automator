@@ -1,7 +1,7 @@
 {
   "name": "ConvertAPI.DocumentConverter",
   "productName": "ConvertAPI Document Converter",
-  "version": "1.0.53",
+  "version": "1.0.54",
   "description": "File conversion workflow desktop app",
   "main": "src/main.js",
   "author": "UAB Baltsoft",
@@ -9,7 +9,7 @@
   "repository": "github:ConvertAPI/convertapi-automator",
   "scripts": {
     "start": "electron .",
-    "scss": "sass --style=compressed --watch assets/css/scss:assets/css",
+    "scss": "sass --style=compressed --watch src/assets/css/scss:src/assets/css",
     "pack": "electron-builder --dir",
     "dist": "electron-builder -p onTag",
     "publish": "electron-builder --win -p always"

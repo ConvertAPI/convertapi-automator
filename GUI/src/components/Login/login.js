@@ -4,6 +4,7 @@ const secret = document.querySelector('#secret');
 
 document.querySelector('form').addEventListener('submit', submitForm);
 document.getElementById('get-secret').addEventListener('click', () => { shell.openExternal('https://www.convertapi.com/a/signup'); });
+document.getElementById('close-application').addEventListener('click', () => { ipcRenderer.send('app:quit') });
 
 function submitForm(e) {
   e.preventDefault();

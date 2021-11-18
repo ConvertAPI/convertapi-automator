@@ -20,20 +20,45 @@
     </ul>
   </nav>
   <div class="container main-wrapper" id="mainWrapper">
+    <!--Placeholder when there are no workflows-->
       <div id="placeholder" class="row mt-5 hidden">
         <h5>Please setup your first conversion workflow.</h5>
       </div>
-    <div class="row js-workflow-wrapper">
+    <!--ENDOF Placeholder-->
+    <!--Low balance notification-->
+      <div class="row hidden" id="balance-notification">
+        <div class="col s12 m12">
+          <div class="card blue">
+            <div class="card-content white-text">
+              <span class="card-title">Dear <span id="customer-name">customer</span>,</span>
+              <p><strong class="orange-text" id="message-text">Your balance is running low.</strong> Please top up your account to keep your conversions running without any interruptions.</p>
+            </div>
+            <div class="card-action white">
+              <a href="#" id="account-top-up" class="btn">Top up your account</a>
+              <a href="#" id="dismiss-balance-notification" class="btn-flat">Remind me later</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--ENDOF Low balance notification-->
+      <!--Workflows wrapper-->
+      <div class="row js-workflow-wrapper">
+      </div>
+      <!--ENDOF Workflows wrapper-->
+      <!--Floating button-->
+      <a class="btn-floating btn-large waves-effect waves-light create-workflow-btn js-create-workflow mb-2" title="Create new workflow"><i class="material-icons">add</i></a>
+      <!--ENDOF Floating button-->
     </div>
-    <a class="btn-floating btn-large waves-effect waves-light create-workflow-btn js-create-workflow mb-2" title="Create new workflow"><i class="material-icons">add</i></a>
-  </div>
 
+  <!--Terminal-->
   <div class="console">
     <div class="header"><span>TERMINAL OUTPUT</span> <i class="material-icons js-close-console">close</i></div>
     <div class="content js-console-content">
     </div>
   </div>
+  <!--ENDOF Terminal-->
 
+  <!--Offline message-->
   <div id="offline" class="hidden">
     <div class="overlay"></div>
     <div class="content">
@@ -43,9 +68,13 @@
       </div>
     </div>
   </div>
+  <!--ENDOF Offline message-->
 
+  <!--Notification toast message-->
   <div class="paper-snackbar"></div>
+  <!--ENDOF Notification toast message-->
 
+  <!--Workflow template-->
   <template id="workflow-template">
     <div class="col s12 m12 l6 xl4">
       <div class="card workflow js-workflow">
@@ -68,5 +97,6 @@
       </div>
     </div>
   </template>
+  <!--ENDOF Workflow template-->
 </body>
 </html>

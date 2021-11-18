@@ -67,12 +67,13 @@ class Converter {
       let result = [];
       if(srcFormat == 'any') {
         converterInfo.forEach(converter => {
-          result.push(...converter.DestinationFileFormats);
+          result.push(...converter.DestinationFileFormats.filter(x=> x!='merge'));
         })
       } else {
         converterInfo.filter(x=>x.SourceFileFormats.indexOf(srcFormat) > -1).forEach(converter => {
           result.push(...converter.DestinationFileFormats);
         })
+        result.indexOf('zip') < 0 ? result.push('zip') : null;
       }
       //return result.filter(this.distinct).filter(x=> x!=='zip' && x!=='merge').sort((a, b) => a.localeCompare(b));
       return result.filter(this.distinct).sort((a, b) => a.localeCompare(b));

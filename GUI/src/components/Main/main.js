@@ -1,12 +1,19 @@
 const electron = require('electron');
-const {ipcRenderer} = electron;
+const { ipcRenderer, shell } = electron;
 const fs = require('fs');
 const path = require('path');
 
+let muteBalanceNotification = false;
+
 document.querySelector('.js-open-settings').addEventListener('click', (e) => { ipcRenderer.send('settings:open'); });
 document.querySelector('.js-close-console').addEventListener('click', (e) => { toggleConsole(false) });
+document.getElementById('account-top-up').addEventListener('click', () => { shell.openExternal('https://www.convertapi.com/a/plans'); });
 document.querySelectorAll('.js-create-workflow').forEach(element => {
   element.addEventListener('click', (e) => { ipcRenderer.send('workflow:create'); });
+});
+document.getElementById('dismiss-balance-notification').addEventListener('click', (e) => { 
+  document.getElementById('balance-notification').classList.add('hidden');
+  muteBalanceNotification = true; 
 });
 
 const updateOnlineStatus = () => {
@@ -67,6 +74,21 @@ ipcRenderer.on('console:error', (e, data) => {
 
 ipcRenderer.on('toast:show', (e, data) => {
   showToast(data);
+});
+
+ipcRenderer.on('user:update', (e, data) => {
+  if(!muteBalanceNotification || (muteBalanceNotification && data.SecondsLeft == 0)) {
+    if(data.SecondsLeft <= 100) {
+      let topUpNotification = document.querySelector('#balance-notification')
+      topUpNotification.querySelector('#customer-name').innerHTML = data.FullName ? data.FullName : 'customer'
+      if(data.SecondsLeft <= 0) {
+        topUpNotification.querySelector('#message-text').innerHTML = 'Your account balance is exhausted.'
+        topUpNotification.querySelector('#message-text').classList.replace('orange-text', 'red-text')
+        topUpNotification.querySelector('#dismiss-balance-notification').classList.add('hidden')
+      }
+      topUpNotification.classList.remove('hidden')
+    }
+  }
 });
 
 function logToConsole(data, isError = false) {

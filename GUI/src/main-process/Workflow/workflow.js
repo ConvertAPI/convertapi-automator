@@ -124,6 +124,10 @@ function saveWorkflowItem(flow, parentPath) {
       }
     });
 
+    // for merge and zip conversions, set JoinFiles=true
+    if((flow.dst == 'merge' || flow.dst == 'zip') && !flow.parameters.JoinFiles)
+      flow.parameters.JoinFiles = true;
+    
     if (!fs.existsSync(currentPath)) {
       fs.mkdir(currentPath, (err) => {
         if (err)

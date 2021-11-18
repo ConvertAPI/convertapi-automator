@@ -15,12 +15,14 @@ class Automator {
             // run exe file with params
       
             this.automatorProcess = spawn(config.AUTOMATOR_PATH, this.getParameters());
-            this.automatorProcess.stdout.on('data', (data) => {
-                // log info to user console
-                this.mainWindow.webContents.send('console:log', data.toString());
-                if(data.toString().startsWith('Result: '))
-                    this.mainWindow.webContents.send('toast:show', `File converted successfully: ${data.toString().replace('Result: ', '')}`)
-            });
+            if(this.mainWindow) {
+                this.automatorProcess.stdout.on('data', (data) => {
+                    // log info to user console
+                    this.mainWindow.webContents.send('console:log', data.toString());
+                    if(data.toString().startsWith('Result: '))
+                        this.mainWindow.webContents.send('toast:show', `File converted successfully: ${data.toString().replace('Result: ', '')}`)
+                });
+            }
             this.automatorProcess.stderr.on('data', (data) => {
                 this.mainWindow.webContents.send('console:error', data.toString());
                 // this.mainWindow.webContents.send('toast:show', data.toString());

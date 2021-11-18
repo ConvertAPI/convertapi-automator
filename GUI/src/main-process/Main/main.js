@@ -7,6 +7,7 @@ const automator = require('../Automator/automator');
 const loginWindow = require('../Login/login');
 const workflowWindow = require('../Workflow/workflow');
 const log = require('electron-log');
+const apiService = require('../../services/api-service.ts');
 
 class Main {
   constructor() {
@@ -68,7 +69,20 @@ class Main {
         }
       });
     });
+
+    // check user balance periodically
+    this.updateUserData();
+    setInterval(() => {
+      _this.updateUserData();
+    }, 1000*60);
+
     return this.window;
+  }
+
+  updateUserData() {
+    apiService.getUserInfo(config.getSecret()).then(userData => {
+      this.window.webContents.send('user:update', userData);
+    })
   }
 
   deleteWorkflow(dirPath) {
